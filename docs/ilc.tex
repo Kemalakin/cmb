@@ -1,0 +1,326 @@
+%%% ilc.tex ---
+
+\documentclass[twoside,10pt]{article}
+
+% \usepackage{epsfig}
+\usepackage{color}
+\usepackage{fancyhdr}
+\usepackage{rotating}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{cool}
+\usepackage{mathrsfs}
+\usepackage{units}
+\usepackage{amsmath}
+\usepackage{subfig}
+\usepackage{bm}
+\Style{DSymb={\mathrm d},IntegrateDifferentialDSymb=\text{d}}
+
+% define formatting
+% A4 paper is 210 x 297 mm
+% pt  point         (1 in = 72.27 pt)
+% pc  pica          (1 pc = 12 pt)
+% in  inch          (1 in = 25.4 mm)
+% bp  big point     (1 in = 72 bp)
+% cm  centimetre    (1 cm = 10 mm)
+% mm  millimetre
+% dd  didot point   (1157 dd = 1238 pt)
+% cc  cicero        (1 cc = 12 dd)
+% sp  scaled point  (65536 sp = 1 pt)
+% em  the width of the letter M in the current font
+% ex  the height of the letter x in the current font
+
+\setlength{\textheight}{11.in}
+\setlength{\textwidth}{8.5in}
+
+\setlength{\topmargin}{0.in}
+\setlength{\headheight}{\baselineskip}
+\setlength{\headsep}{2\baselineskip}
+
+\addtolength{\textheight}{-\headheight}
+\addtolength{\textheight}{-\headsep}
+\addtolength{\textheight}{-2.in}
+\addtolength{\textwidth}{-2.in}
+
+
+\setlength{\oddsidemargin}{0.in}
+\setlength{\evensidemargin}{0.in}
+
+\setlength{\parindent}{0.em}
+\setlength{\parskip}{0.75\baselineskip}
+
+\def\boxwidth{\textwidth}
+\def\doctitle{Internal Linear Combination Method for Foreground Subtraction}
+\def\myname{Justin Lazear}      % Primary author defined here
+\def\myemail{\texttt{jlazear@pha.jhu.edu}} % Primary author email
+\def\piper{\textsc{Piper}}
+\def\tablefont{\footnotesize}
+
+% \renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+%% \pagestyle{fancy}
+%% \fancyhead{}
+%% \fancyhead[LE,RO]{{\it {\large \thepage}}}
+%% \fancyhead[RE]{{\it {\large \myname{}}}}
+%% \fancyhead[LO]{{\it {\large \doctitle{}}}}
+%% \fancyfoot{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Define some math macros for convenience
+
+% Note that most necessarily math macros are defined by the cool
+% package, so this section is sparse.
+
+\DeclareMathOperator{\num}{num}
+\DeclareMathOperator{\vvar}{var}
+\DeclareMathOperator{\cvar}{cov}
+\DeclareMathOperator{\bcvar}{\mathbf{cov}}
+\DeclareMathOperator{\diagop}{diag}
+
+\newcommand{\ve}[1]{\mathbf{#1}}
+\newcommand{\Avg}[1]{\left< #1 \right>}
+\newcommand{\pp}[1]{\left( #1 \right)}
+\newcommand{\pb}[1]{\left[ #1 \right]}
+\newcommand{\pc}[1]{\left{ #1 \right} }
+\newcommand{\dd}[0]{\mathrm{d}}
+\newcommand{\Tip}[0]{T_i(p)}
+\newcommand{\Tcmbp}[0]{T_\mathrm{CMB}(p)}
+\newcommand{\Rip}[0]{R_i(p)}
+\newcommand{\zip}[0]{\zeta_i(p)}
+\newcommand{\Rjp}[0]{R_j(p)}
+\newcommand{\zjp}[0]{\zeta_j(p)}
+\newcommand{\hTp}[0]{\hat{T}(p)}
+\newcommand{\Ti}[0]{T_i}
+\newcommand{\Tcmb}[0]{T_\mathrm{CMB}}
+\newcommand{\Ri}[0]{R_i}
+\newcommand{\zi}[0]{\zeta_i}
+\newcommand{\Rj}[0]{R_j}
+\newcommand{\zj}[0]{\zeta_j}
+\newcommand{\hT}[0]{\hat{T}}
+\newcommand{\var}[1]{\vvar{\left(#1\right)}}
+\newcommand{\cov}[1]{\cvar{\left(#1\right)}}
+\newcommand{\bcov}[1]{\bcvar{\left(#1\right)}}
+\newcommand{\covT}[1]{\cvar^T{\left(#1\right)}}
+\newcommand{\bcovT}[1]{\bcvar^T{\left(#1\right)}}
+\newcommand{\bone}[0]{\mathbf{1}}
+\newcommand{\diag}[1]{\diagop{\left( #1 \right)}}
+\newcommand{\bz}[0]{\bm{\zeta}}
+\newcommand{\pderivht}[1]{\frac{\partial \vvar{\hat{T}}}{\partial #1}}
+\newcommand{\varhT}[0]{\vvar{\hat{T}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{\doctitle}
+\author{\myname}
+\date{Jan 7, 2014}
+
+\begin{document}
+\maketitle
+
+\section{Internal Linear Combination method of foreground subtraction}
+\label{sec:ilc}
+
+Consider a measurement of the full CMB sky in $k$ different frequency bands.
+The product of such a measurement is $k$ temperature maps
+
+\begin{equation}
+    \Tip = \text{Temperature map of frequency band }\nu_i\text{ with pixel index }p
+\end{equation}
+
+where $i$ is the frequency band index with $i = 1, \dots, k$ and $p$ is the
+pixel index with $p = 1, \dots, N$. We will choose to represent the maps in
+thermodynamic temperature units\footnote{Thermodynamic temperature units are
+defined relative to the Planck distribution, and are a measure of power per
+unit area. The key point to keep in mind that the thermodynamic temperature
+units are referencing a blackbody (Planck) spectrum, so any additional
+information required to get to the desired units must be pulled from the
+properties of the map (e.g. area).
+
+Sky maps are usually given in terms of spectral intensity, i.e. energy per
+unit area per unit solid angle per unit frequency, with SI unit
+$\unit{\frac{W}{m^2\,sr\,Hz}}$. Commonly, intensity is given in terms of
+mega-Janskies per steradian, where $\unit[1]{Jy} = \unit[10^{-26}]{\frac{W}{m^2\,Hz}}$, so
+$\unit[1]{\frac{w}{m^2\,sr\,Hz}} = \unit[10^{20}]{\frac{MJy}{sr}}$.
+
+Spectral intensity $I_\nu$ is related to thermodynamic temperature units $T$
+by the Planck distribution,
+\begin{equation}
+    I_\nu = \frac{2 h \nu^3}{c^2} \frac{1}{\exp{\left(h\nu/k_B T \right)} - 1} = B_\nu(T).
+\end{equation}
+From inspection, we can see that $T$ has units of Kelvin, but encodes the
+same information as spectral intensity.
+
+The last common unit is antenna temperature $T_A$, which is the low-frequency
+limit of the above relation,
+\begin{equation}
+    I_\nu = \frac{2 k_B \nu^2}{c^2} T_A,
+\end{equation}
+where we note that all we have done is expand the inverse exponential term in
+the $h\nu/k_B T \ll 1$ limit. The antenna temperature also has units of
+Kelvin.
+
+We note that the conversions between spectral intensity and the
+temperatures are frequency-dependent, and do not simply have a numerical
+value. Additionally, since the CMB spectrum is a blackbody (ignoring spectral
+distortions), its thermodynamic temperature is constant for all frequencies.}.
+
+Such maps are usually encoded in the HEALpix\cite{gorski_healpix_2005} format.
+Care must be taken to ensure that all maps that are used have the same number
+of pixels (typically $N_\mathrm{side} = 512$ for WMAP) and that all maps have
+been smoothed to the same resolution (typically $1^\circ$).
+
+The temperature maps can (theoretically) be decomposed into a CMB component
+and a residual component
+\begin{equation}
+    \Tip = \Tcmbp + \Rip,
+\end{equation}
+where the $\Tcmbp$ component does not dependent on frequency (since we have
+chosen thermodynamic temperature units), and the $\Rip$ component encodes
+\emph{all} sources of signal that are not from the CMB. Since the CMB
+component will be constant in frequency, we expect that we can combine the
+various maps in different frequencies to construct an estimator of the CMB map
+$\Tcmbp$. We construct an estimator using a linear combination of the maps in
+different frequency bands with to-be-determined weights
+$\zip$\cite{bennett_first-year_2003, eriksen_foreground_2004,
+hinshaw_three-year_2007},
+\begin{align}
+    \hTp & = \sum_{i=1}^k \zip \Tip \\
+    & = \sum_i \zip \left[ \Tcmbp + \Rip \right] \notag \\
+    \hTp & = \Tcmbp \sum_i \zip + \sum_i \zip \Rip.
+\end{align}
+We note that there are $\num{(\zip)} = Nk$ unknown parameters in our estimator.
+In order for the estimator $\hTp$ to have unity gain in $\Tcmbp$, we must have
+\begin{equation}
+    \sum_i \zip = 1 \qquad \forall\ p
+\end{equation}
+which provides $N$ constraint equations. This results in
+\begin{equation}
+    \hTp = \Tcmbp + \sum_{i=1}^k \zip \Rip.
+\end{equation}
+
+Further properties of the estimator $\hTp$ will be determined by how we choose
+to constrain the remaining $(N-1)k$ degrees of freedom.
+
+We note some statistical properties of the estimator.
+
+\begin{gather*}
+    \Avg{\hT} = \Avg{\Tcmb} + \sum_i \Avg{\zi \Ri} \\
+    \varhT = \var{\Tcmb} + \sum_i \var{\zi \Ri} + \sum_i \cov{\Tcmb, \zi\Ri} + \sum_{i\neq j} \cov{\zi \Ri, \zj \Rj}
+\end{gather*}
+
+where the expectation value, variance, and covariance operators are defined
+over the pixels\footnote{I.e.,
+
+\begin{gather*}
+    \Avg{x} = \frac{1}{N} \sum_{p=1}^N x(p) \\
+    \var{x} = \cov{x, x} = \Avg{x^2} - \Avg{x}^2 \\
+    \cov{x, y} = \Avg{xy} - \Avg{x}\Avg{y}
+\end{gather*}
+}.
+
+We can write the variance of the estimator in a matrix formalism by expanding
+the definition of the covariance operator to allow for vector\footnote{More
+precisely, the covariance operator is a functional and we are extending it to
+allow for a vector of discrete input functions. In this formalism, we think of
+each map as a discrete function with a single argument $p$ and domain
+$p = 1, \dots, N$.} arguments,
+
+\begin{gather*}
+    \bcov{a, \ve{x}} =
+        \begin{pmatrix}
+            \cov{a, x_1} \\
+            \vdots \\
+            \cov{a, x_n}
+        \end{pmatrix}, \qquad \bcov{a, \ve{x}^T} =
+        \begin{pmatrix}
+            \cov{a, x_1} & \cdots & \cov{a, x_n}
+        \end{pmatrix} = \bcov{a, \ve{x}}^T \\
+    \cov{\ve{x}, \ve{y}^T} = \cov{\ve{x}^T, \ve{y}} = \cov{\ve{x}, \ve{y}^T}^T =
+        \begin{pmatrix}
+            \cov{x_1, y_1} & \cdots & \cov{x_1, y_n} \\
+            \vdots         & \ddots & \vdots         \\
+            \cov{x_n, y_1} & \cdots & \cov{x_n, y_n}
+        \end{pmatrix}.
+\end{gather*}
+
+Then we define $\ve{v}^T = \left(\begin{smallmatrix}\Tcmb & \bm{\eta}^T\end{smallmatrix}\right) = \left( \Tcmb,\ \zeta_1R_1,\ \dots,\ \zeta_kR_k \right)$,
+so
+
+\begin{equation}
+    \varhT = \bone^T \cov{\ve{v}, \ve{v}^T} \bone
+\end{equation}
+
+and we note that $\cov{\ve{v}, \ve{v}^T}$ has the form
+
+\begin{equation}
+    \cov{\ve{v}, \ve{v}^T} =
+        \begin{pmatrix}
+            \cov{\Tcmb, \Tcmb}      & \bcov{\Tcmb, \bm{\eta}^T}     \\
+            \bcov{\Tcmb, \bm{\eta}} & \cov{\bm{\eta}, \bm{\eta}^T}
+        \end{pmatrix}
+\end{equation}
+
+As a final note, all we can say about the estimator at this point is that it
+is unity gain in $\Tcmb$ and that $\varhT \geq 0$ (since covariance
+matrices are positive semi-definite). $\hT$ may be biased and its variance may
+not be an accurate estimate of $\var{\Tcmb}$.
+
+\section{Constant weighting factors}
+\label{sec:constant_weighting_factors}
+
+Suppose that the weight factors $\zip$ were uniform across the entire map, so
+$\zip = \zi$. Then
+
+\begin{equation}
+    \cov{\Tcmb, \zi \Ri} = \zi \cov{\Tcmb, \Ri} \quad\text{and}\quad
+    \cov{\zi\Ri, \zj\Rj} = \zi \zj \cov{\Ri, \Rj}
+\end{equation}
+
+so
+
+\begin{equation}
+    \bcov{\Tcmb, \bm{\eta}} = \diag{\bz} \bcov{\Tcmb, \ve{\Ri}} \quad\text{and}\quad
+    \cov{\bm{\eta}, \bm{\eta}^T} = \diag{\bz} \cov{\ve{R}, \ve{R}^T} \diag{\bz}
+\end{equation}
+
+and $\varhT$ may be written
+
+\begin{align}
+    \varhT & =
+        \begin{pmatrix}
+            1 & \bz^T
+        \end{pmatrix}
+        \begin{pmatrix}
+            \cov{\Tcmb, \Tcmb}     & \bcov{\Tcmb, \ve{R}^T} \\
+            \bcov{\Tcmb, \ve{R}}   & \cov{\ve{R}, \ve{R}^T}
+        \end{pmatrix}
+        \begin{pmatrix}
+            1 \\
+            \bz
+        \end{pmatrix} \notag \\
+    \varhT & = \var{\Tcmb} + 2\bcov{\Tcmb, \ve{R}^T} \bz + \bz^T \cov{\ve{R}, \ve{R}^T} \bz \label{eq:varhT}
+\end{align}
+
+which we note is a convex\footnote{The positive semi-definiteness of
+$\cov{\ve{R}, \ve{R}^T}$ implies that the function is convex.} quadratic form
+in $\bz$, which therefore must have a unique minimum.
+
+We may minimize $\varhT$ by finding the extremum of the RHS of the Eq.~\ref{eq:varhT}.
+
+\begin{align}
+    0 = \pderivht{\bz} & = \left( \pderivht{\zeta_1},\ \dots,\ \pderivht{\zeta_n} \right) = 2\bcov{\Tcmb, \ve{R}} + 2\bz^T \cov{\ve{R}, \ve{R}^T} \notag\\
+    \bz^* & = -\cov{\ve{R}, \ve{R}^T}^{-1} \bcov{\Tcmb, \ve{R}}
+\end{align}
+
+which matches the result of Hinshaw 2007\cite{hinshaw_three-year_2007} (Eq.~10).
+
+Does $\bz^*$ satisfy $\sum_i \zeta^*_i = \ve{1}^T \bz^* = -\ve{1}^T \cov{\ve{R}, \ve{R}^T}^{-1} \bcov{\Tcmb, \ve{R}} = 1$?
+
+\bibliography{ilc}
+\bibliographystyle{plain}
+
+\end{document}
