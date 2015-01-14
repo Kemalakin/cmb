@@ -79,24 +79,24 @@
 \DeclareMathOperator{\cvar}{cov}
 \DeclareMathOperator{\bcvar}{\mathbf{cov}}
 \DeclareMathOperator{\diagop}{diag}
+\DeclareMathOperator*{\argmin}{arg\,min}
 
 \newcommand{\ve}[1]{\mathbf{#1}}
 \newcommand{\Avg}[1]{\left< #1 \right>}
 \newcommand{\pp}[1]{\left( #1 \right)}
 \newcommand{\pb}[1]{\left[ #1 \right]}
-\newcommand{\pc}[1]{\left{ #1 \right} }
+\newcommand{\pc}[1]{\left\{ #1 \right\} }
 \newcommand{\dd}[0]{\mathrm{d}}
 \newcommand{\Tip}[0]{T_i(p)}
 \newcommand{\Tcmbp}[0]{T_\mathrm{CMB}(p)}
 \newcommand{\Rip}[0]{R_i(p)}
-\newcommand{\zip}[0]{\zeta_i(p)}
+\newcommand{\wip}[0]{w_i(p)}
 \newcommand{\Rjp}[0]{R_j(p)}
 \newcommand{\zjp}[0]{\zeta_j(p)}
 \newcommand{\hTp}[0]{\hat{T}(p)}
 \newcommand{\Ti}[0]{T_i}
 \newcommand{\Tcmb}[0]{T_\mathrm{CMB}}
 \newcommand{\Ri}[0]{R_i}
-\newcommand{\zi}[0]{\zeta_i}
 \newcommand{\Rj}[0]{R_j}
 \newcommand{\zj}[0]{\zeta_j}
 \newcommand{\hT}[0]{\hat{T}}
@@ -110,6 +110,12 @@
 \newcommand{\bz}[0]{\bm{\zeta}}
 \newcommand{\pderivht}[1]{\frac{\partial \vvar{\hat{T}}}{\partial #1}}
 \newcommand{\varhT}[0]{\vvar{\hat{T}}}
+\newcommand{\vw}[0]{\ve{w}}
+\newcommand{\vT}[0]{\ve{T}}
+\newcommand{\bC}[0]{\mathbf{C}}
+\newcommand{\bF}[0]{\mathbf{F}}
+\newcommand{\bG}[0]{\mathbf{G}}
+\newcommand{\vX}[0]{\ve{X}}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -185,151 +191,202 @@ component will be constant in frequency, we expect that we can combine the
 various maps in different frequencies to construct an estimator of the CMB map
 $\Tcmbp$. We construct an estimator using a linear combination of the maps in
 different frequency bands with to-be-determined weights
-$\zip$\cite{bennett_first-year_2003, eriksen_foreground_2004,
+$\wip$\cite{bennett_first-year_2003, eriksen_foreground_2004,
 hinshaw_three-year_2007},
 \begin{align}
-    \hTp & = \sum_{i=1}^k \zip \Tip \\
-    & = \sum_i \zip \left[ \Tcmbp + \Rip \right] \notag \\
-    \hTp & = \Tcmbp \sum_i \zip + \sum_i \zip \Rip.
+    \hTp & = \sum_{i=1}^k \wip \Tip \\
+    & = \sum_i \wip \left[ \Tcmbp + \Rip \right] \notag \\
+    \hTp & = \Tcmbp \sum_i \wip + \sum_i \wip \Rip.
 \end{align}
-We note that there are $\num{(\zip)} = Nk$ unknown parameters in our estimator.
+We note that there are $\num{(\wip)} = Nk$ unknown parameters in our estimator.
 In order for the estimator $\hTp$ to have unity gain in $\Tcmbp$, we must have
 \begin{equation}
-    \sum_i \zip = 1 \qquad \forall\ p
+    \sum_i \wip = 1 \qquad \forall\ p
 \end{equation}
 which provides $N$ constraint equations. This results in
 \begin{equation}
-    \hTp = \Tcmbp + \sum_{i=1}^k \zip \Rip.
+    \hTp = \Tcmbp + \sum_{i=1}^k \wip \Rip.
 \end{equation}
 
 Further properties of the estimator $\hTp$ will be determined by how we choose
 to constrain the remaining $(N-1)k$ degrees of freedom.
 
-We note some statistical properties of the estimator.
+Let us now introduce a matrix notation for this system.
 
-\begin{gather*}
-    \Avg{\hT} = \Avg{\Tcmb} + \sum_i \Avg{\zi \Ri} \\
-    \varhT = \var{\Tcmb} + \sum_i \var{\zi \Ri} + \sum_i \cov{\Tcmb, \zi\Ri} + \sum_{i\neq j} \cov{\zi \Ri, \zj \Rj}
-\end{gather*}
+Define vectors as column vectors of the frequency bands, so
 
-where the expectation value, variance, and covariance operators are defined
-over the pixels\footnote{I.e.,
+\begin{equation*}
+    \vT^T = \left( T_1(p), \dots, T_k(p) \right) \quad \text{and} \quad
+    \vw^T = \left( w_1(p), \dots, w_k(p) \right),
+\end{equation*}
 
-\begin{gather*}
-    \Avg{x} = \frac{1}{N} \sum_{p=1}^N x(p) \\
-    \var{x} = \cov{x, x} = \Avg{x^2} - \Avg{x}^2 \\
-    \cov{x, y} = \Avg{xy} - \Avg{x}\Avg{y}
-\end{gather*}
-}.
-
-We can write the variance of the estimator in a matrix formalism by expanding
-the definition of the covariance operator to allow for vector\footnote{More
-precisely, the covariance operator is a functional and we are extending it to
-allow for a vector of discrete input functions. In this formalism, we think of
-each map as a discrete function with a single argument $p$ and domain
-$p = 1, \dots, N$.} arguments,
-
-\begin{gather*}
-    \bcov{a, \ve{x}} =
-        \begin{pmatrix}
-            \cov{a, x_1} \\
-            \vdots \\
-            \cov{a, x_n}
-        \end{pmatrix}, \qquad \bcov{a, \ve{x}^T} =
-        \begin{pmatrix}
-            \cov{a, x_1} & \cdots & \cov{a, x_n}
-        \end{pmatrix} = \bcov{a, \ve{x}}^T \\
-    \cov{\ve{x}, \ve{y}^T} = \cov{\ve{x}^T, \ve{y}} = \cov{\ve{x}, \ve{y}^T}^T =
-        \begin{pmatrix}
-            \cov{x_1, y_1} & \cdots & \cov{x_1, y_n} \\
-            \vdots         & \ddots & \vdots         \\
-            \cov{x_n, y_1} & \cdots & \cov{x_n, y_n}
-        \end{pmatrix}.
-\end{gather*}
-
-Then we define $\ve{v}^T = \left(\begin{smallmatrix}\Tcmb & \bm{\eta}^T\end{smallmatrix}\right) = \left( \Tcmb,\ \zeta_1R_1,\ \dots,\ \zeta_kR_k \right)$,
-so
+then we may write our estimator as
 
 \begin{equation}
-    \varhT = \bone^T \cov{\ve{v}, \ve{v}^T} \bone
+    \hT = \vw^T \vT
 \end{equation}
 
-and we note that $\cov{\ve{v}, \ve{v}^T}$ has the form
+and the unity gain constraint as
 
 \begin{equation}
-    \cov{\ve{v}, \ve{v}^T} =
-        \begin{pmatrix}
-            \cov{\Tcmb, \Tcmb}      & \bcov{\Tcmb, \bm{\eta}^T}     \\
-            \bcov{\Tcmb, \bm{\eta}} & \cov{\bm{\eta}, \bm{\eta}^T}
-        \end{pmatrix}
+    \ve{1}^T \vw = 1
 \end{equation}
-
-As a final note, all we can say about the estimator at this point is that it
-is unity gain in $\Tcmb$ and that $\varhT \geq 0$ (since covariance
-matrices are positive semi-definite). $\hT$ may be biased and its variance may
-not be an accurate estimate of $\var{\Tcmb}$.
 
 \section{Constant weighting factors}
 \label{sec:constant_weighting_factors}
 
-Suppose that the weight factors $\zip$ were uniform across the entire map, so
-$\zip = \zi$. Then
+Suppose the weight factors $\vw(p)$ were uniform across the entire map, so
+$\vw(p) = \vw$. We note in this case that our estimator $\hT$ is a
+linear function with regards to $\vT$, so then the variance of $\hT$ has a
+particularly simple form
 
 \begin{equation}
-    \cov{\Tcmb, \zi \Ri} = \zi \cov{\Tcmb, \Ri} \quad\text{and}\quad
-    \cov{\zi\Ri, \zj\Rj} = \zi \zj \cov{\Ri, \Rj}
+    \varhT = \vw^T \cov{\vT, \vT} \vw
 \end{equation}
 
-so
+where $\left(\cov{\vT, \vT}\right)_{ij} = \cov{T_i, T_j}$\footnote{
+Expectation values are defined over the pixels, so
+\begin{equation*}
+    \Avg{T_i} = \sum_{p=1}^N T_i(p)
+\end{equation*}
+then
+\begin{equation*}
+    \cov{T_i, T_j} = \Avg{T_i T_j} - \Avg{T_i}\Avg{T_j}.
+\end{equation*}
+It is worth noting that $\cov{\vT, \vT} = \cov{\vT, \vT}^T$ and
+$\cov{\vT, \vT} \succeq 0$, i.e. the covariance matrix is symmetric and
+positive semi-definite.} is the covariance matrix of $\vT$.
+
+We choose to optimize $\vw$ so that $\varhT$ is minimized, i.e.
 
 \begin{equation}
-    \bcov{\Tcmb, \bm{\eta}} = \diag{\bz} \bcov{\Tcmb, \ve{\Ri}} \quad\text{and}\quad
-    \cov{\bm{\eta}, \bm{\eta}^T} = \diag{\bz} \cov{\ve{R}, \ve{R}^T} \diag{\bz}
+    \vw^* = \argmin_{\vw} \left( \varhT(\vw; \vT) \right)
 \end{equation}
 
-and $\varhT$ may be written
+We will do this in two spaces: the raw temperature map space $\pc{\vT}$, and
+the foreground-background space $\pc{\Tcmb, \ve{R}}$. The first solution will
+be used to actually perform the foreground cleaning, while the second will
+give us a sense of what the algorithm is doing. Let us proceed with the first
+solution.
+
+\subsection{Raw temperature map space}
+\label{sub:raw_temperature_map_space}
+
+Let $\bC = \cov{\vT, \vT}$, i.e. $\bC_{ij} = \cov{T_i, T_j}$.
+Then we may write our minimization problem as
+
+\begin{equation}
+    \varhT = \vw^T \bC \vw \quad \text{subject to} \quad \bone^T \vw = 1
+\end{equation}
+
+which may be solved with Lagrange multipliers. Define the function
+
+\begin{equation}
+    L = \varhT + \lambda \left( \bone^T \vw - 1 \right).
+\end{equation}
+
+Then the solution to our optimization problem is given by the set of equations
+
+\begin{gather}
+    \frac{\partial L}{\partial \vw^T} = 2\bC \vw + \lambda \bone = 0 \label{eq:dLdw}\\
+    \bone^T \vw = 1 \label{eq:constraint}
+\end{gather}
+
+Solving Eq.~\eqref{eq:dLdw} for $\vw$
+
+\begin{equation*}
+    \vw = -\frac{\lambda}{2} \bC^{-1} \bone
+\end{equation*}
+
+and plugging it into Eq.~\eqref{eq:constraint} allows us to solve for $\lambda$,
 
 \begin{align}
-    \varhT & =
-        \begin{pmatrix}
-            1 & \bz^T
-        \end{pmatrix}
-        \begin{pmatrix}
-            \cov{\Tcmb, \Tcmb}     & \bcov{\Tcmb, \ve{R}^T} \\
-            \bcov{\Tcmb, \ve{R}}   & \cov{\ve{R}, \ve{R}^T}
-        \end{pmatrix}
-        \begin{pmatrix}
-            1 \\
-            \bz
-        \end{pmatrix} \notag \\
-    \varhT & = \var{\Tcmb} + 2\bcov{\Tcmb, \ve{R}^T} \bz + \bz^T \cov{\ve{R}, \ve{R}^T} \bz \label{eq:varhT}
+    \bone^T \vw & = -\frac{\lambda}{2} \bone^T \bC^{-1} \bone = 1 \notag \\
+    \lambda & = -2\left( \bone^T \bC^{-1} \bone \right)^{-1}
 \end{align}
 
-which we note is a convex\footnote{The positive semi-definiteness of
-$\cov{\ve{R}, \ve{R}^T}$ implies that the function is convex.} quadratic form
-in $\bz$, which therefore must have a unique minimum.
-
-We may minimize $\varhT$ by finding the extremum of the RHS of the Eq.~\ref{eq:varhT}.
-
-\begin{align}
-    0 = \pderivht{\bz} & = \left( \pderivht{\zeta_1},\ \dots,\ \pderivht{\zeta_n} \right) = 2\bcov{\Tcmb, \ve{R}} + 2\bz^T \cov{\ve{R}, \ve{R}^T} \notag\\
-    \bz^* & = -\cov{\ve{R}, \ve{R}^T}^{-1} \bcov{\Tcmb, \ve{R}}
-\end{align}
-
-which matches the result of Hinshaw 2007\cite{hinshaw_three-year_2007} (Eq.~10).
-
-Does $\bz^*$ satisfy $\sum_i \zeta^*_i = \ve{1}^T \bz^* = -\ve{1}^T \cov{\ve{R}, \ve{R}^T}^{-1} \bcov{\Tcmb, \ve{R}} = 1$?
-
-
-With the assumptions $\ve{F} = \ve{F}^T$ and $\ve{w}^T \ve{1} = \ve{1}^T \ve{w} = 1$,
-what is the solution for $\ve{w}$ to
+and then we may substitute into $\vw$,
 
 \begin{equation}
-    \left( \ve{1} \ve{X}^T - \ve{F} + \ve{1} \ve{w}^T \ve{F} \right) \ve{w} = \ve{X}
+    \vw^* = \frac{\bC^{-1} \bone}{\left( \bone^T \bC^{-1} \bone \right)}
 \end{equation}
 
-where $\ve{X}, \ve{1}, \ve{w}$ are vectors, and $\ve{F}$ is a matrix?
+We note that
 
+\begin{equation}
+    w_i^* = \frac{\sum_j \mathrm{C}^{-1}_{ij}}{\sum_{jk}\mathrm{C}^{-1}_{jk}}
+\end{equation}
+
+which matches Eriksen et al\cite{eriksen_foreground_2004}.
+
+$\bC$ is a $k \times k$ matrix, where $k$ is the number of frequency bands,
+which is typically order unity. Thus, computing $\vw^*$ from $\bC$ requires
+the inversion of a small matrix and the sum of its components and may be done
+cheaply. Far more expensive is the computation of each element of the matrix
+$\mathrm{C}_{ij} = \sum_{p=1}^N T_i(p) T_j(p) - \sum_{p=1}^N T_i(p) \sum_{p=1}^N T_j(p)$,
+which is $\mathcal{O}(4N)$. Given that matrix inversion of $\bC$ is
+pessimistically $\mathcal{O}(k^3)$ and $N = 12N_\mathrm{side}^2$, our total
+complexity is $\mathcal{O}(48N_\mathrm{side}^2k^3)$.
+
+\subsection{Foreground-background space}
+\label{sub:foreground_background_space}
+
+Let us now perform the same optimization supposing we already know the
+decomposition between residual (foreground) and CMB (background). The
+optimization procedure will produce the same set of equations to solve,
+Eqs.~\eqref{eq:dLdw} and \eqref{eq:constraint}.
+
+\begin{gather*}
+    \frac{\partial L}{\partial \vw^T} = 2\bC \vw + \lambda \bone = 0 \label{eq:dLdw}\\
+    \bone^T \vw = 1 \label{eq:constraint}
+\end{gather*}
+
+We note that the covariance matrix may be decomposed into foreground and
+background components, since $\vT = \Tcmb \bone + \ve{R}$,
+
+\begin{align}
+    \bC & = \cov{\Tcmb \bone + \ve{R}, \Tcmb \bone + \ve{R}} \notag \\
+    & = \var{\Tcmb} \bone \bone^T + \bcov{\Tcmb, \ve{R}} \bone^T + \bone \bcov{\Tcmb, \ve{R}}^T + \cov{\ve{R}, \ve{R}} \notag \\
+    \bC & = \sigma_B^2 \bone \bone^T + \vX \bone^T + \bone \vX^T + \bF
+\end{align}
+
+where we've defined $\sigma_B^2 \equiv \var{\Tcmb}$,
+$\vX \equiv \bcov{\Tcmb, \ve{R}}$\footnote{Explicitly,
+$X_i = \cov{\Tcmb, R_i}$.}, and $\bF = \cov{\ve{R}, \ve{R}}$. So our system of
+equations becomes
+
+\begin{gather}
+    2\sigma_B^2 \bone + 2\vX + 2 \bone \vX^T \vw + 2\bF \vw + \lambda \bone = 0 \\
+    \bone^T \vw = 1 \notag
+\end{gather}
+
+which may be solved in an identical manner,
+
+\begin{align}
+    \vw & = -\left( \frac{\lambda}{2} + \sigma_B^2 \right) (\bF + \bone \vX^T)^{-1} \bone - (\bF + \bone \vX^T)^{-1} \vX \notag \\
+    \vw & = -\left( \frac{\lambda}{2} + \sigma_B^2 \right) \bG^{-1} \bone - \bG^{-1} \vX
+\end{align}
+
+where we've defined $\bG \equiv \bF + \bone \vX^T$. So
+
+\begin{equation}
+    \frac{\lambda}{2} + \sigma_B^2 = -\frac{1 + (\bone^T \bG^{-1} \vX)}{(\bone^T \bG^{-1} \bone)}
+\end{equation}
+
+and our solution is
+
+\begin{equation}
+    \vw^* = \frac{1 + (\bone^T \bG^{-1} \vX)}{(\bone^T \bG^{-1} \bone)} \bG^{-1} \bone - \bG^{-1} \vX
+\end{equation}
+
+In component form, this is
+
+\begin{equation}
+    w_i^* = \frac{1 + \sum_{jk} \left( \bF + \bone \vX^T \right)^{-1}_{jk} X_j}{\sum_{jk} \left( \bF + \bone \vX^T \right)^{-1}_{jk}} \sum_{j} \left( \bF + \bone \vX^T \right)^{-1}_{ij} - \sum_{j} \left( \bF + \bone \vX^T \right)^{-1}_{ij} X_j
+\end{equation}
+
+which differs slightly from the result of Efstathiou et
+al\cite{efstathiou_impact_2009} in that $\bF \to \bF + \bone \vX^T$.
 
 \bibliography{ilc}
 \bibliographystyle{plain}
