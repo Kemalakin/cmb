@@ -9,7 +9,7 @@ Tools for loading WMAP data from LAMBDA data files.
 
 Example:
 
-<example code here>
+> map_K = load_wmap_maps('../data/wmap_band_smth_imap_r9_9yr_K_v5.fits')
 """
 __version__ = 20150116
 __releasestatus__ = 'beta'
@@ -62,7 +62,7 @@ def load_wmap_maps(fnames, n2r=True):
     return a
 
 
-def load_wmap_masks(fname='data/wmap_ilc_rgn_defn_9yr_v5.fits', n2r=True):
+def load_wmap_masks(fname, n2r=True):
     """
     Loads the WMAP ILC region definition files and constructs the region masks.
 
@@ -87,10 +87,25 @@ def load_wmap_masks(fname='data/wmap_ilc_rgn_defn_9yr_v5.fits', n2r=True):
             bitmask = hp.reorder(bitmask, n2r=True)
             region = hp.reorder(region, n2r=True)
 
-    masks = np.empty([12, len(bitmask)])
+    masks = np.empty([12, len(bitmask)], dtype='bool')
     for i in range(12):
         masks[i] = (bitmask >> i) & 1
     return masks, region
+
+
+# From Table 12 of Bennett et al 2013, ADS: 2013ApJS..208...20B
+ilc_weights = np.array([[.1555, -.7572, -.2689, 2.2845, -.4138],
+                        [.0375, -.5137, .0223, 2.0378, -.5839],
+                        [.0325, -.3585, -.3103, 1.8521, -.2157],
+                        [-.0910, .1741, -.6267, 1.5870, -.0433],
+                        [-.0762, .0907, -.4273, .9707, .4421],
+                        [.1998, -.7758, -.4295, 2.4684, -.4629],
+                        [-.0880, .1712, -.5306, 1.0097, 0.4378],
+                        [.1578, -.8074, -.0923, 2.1966, -.4547],
+                        [.1992, -.1736, -1.8081, 3.7271, -.9446],
+                        [-.0813, -.1579, -.0551, 1.2108, .0836],
+                        [.1717, -.8713, -.1700, 2.8314, -.9618],
+                        [.2353, -.8325, -.6333, 2.8603, -.6298]])
 
 
 def main():
@@ -102,6 +117,13 @@ def main():
     print "Loading WMAP data..."
     maps = load_wmap_maps(fnames)
     masks, region = load_wmap_masks(maskdata)
+
+    hp.mollview(region, title='WMAP ILC Regions')
+    summap = sum(masks[i]*(i+1) for i in range(len(masks)))
+    hp.mollview(summap, title='WMAP ILC "bitmasks", i.e. sum(masks[i]*(i+1)')
+    from matplotlib import pyplot
+    pyplot.show()
+
     return maps, masks, region
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@ the Internal Linear Combination (ILC) method.
 
 Example:
 
-<example code here>
+See main() of this file.
 """
 __version__ = 20150116
 __releasestatus__ = 'beta'
@@ -29,12 +29,16 @@ def compute_ilc_weights(maps, masks=None):
     `maps` should be a k x Npix array. Each of the k rows should be a map at
     one of the k different frequencies. All maps must have the same length.
 
-    `masks` may be None, a single mask map, or a list/array of masks. If
-    `masks` is None, then all pixels in `maps` are used to construct the ILC
-    weights. If `masks` is a single map, uses only pixels in each of the
-    `maps` that have a value of 1 in the mask. If `masks` is a list of masks,
-    constructs an ILC weighting for each mask and returns an array of ILC
-    weights.
+    `masks` may be None, a single mask map, or a list/array of masks.
+
+    If `masks` is None, then all pixels in `maps` are used to construct the
+    ILC weights.
+
+    If `masks` is a single map, uses only pixels in each of the `maps` that
+    have a value of 1 in the mask.
+
+    If `masks` is a list of masks, constructs an ILC weighting for each mask
+    and returns an array of ILC weights.
     """
     nd = np.ndim(masks)
     if nd == 0:
