@@ -326,7 +326,7 @@ cheaply. Far more expensive is the computation of each element of the matrix
 $\mathrm{C}_{ij} = \sum_{p=1}^N T_i(p) T_j(p) - \sum_{p=1}^N T_i(p) \sum_{p=1}^N T_j(p)$,
 which is $\mathcal{O}(4N)$. Given that matrix inversion of $\bC$ is
 pessimistically $\mathcal{O}(k^3)$ and $N = 12N_\mathrm{side}^2$, our total
-complexity is $\mathcal{O}(48N_\mathrm{side}^2k^3)$.
+complexity is $\mathcal{O}(48N_\mathrm{side}^2 + k^3)$.
 
 \subsection{Foreground-background space}
 \label{sub:foreground_background_space}

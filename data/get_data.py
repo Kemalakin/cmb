@@ -26,7 +26,9 @@ import wget
 fnames = [('http://lambda.gsfc.nasa.gov/data/map/dr5/skymaps/9yr/smoothed'
           '/wmap_band_smth_imap_r9_nineyear_v5.tar.gz'),
           ('http://lambda.gsfc.nasa.gov/data/map/dr5/dfp/ilc/wmap_ilc_9yr_v5'
-          '.fits'),]
+          '.fits'),
+          ('http://lambda.gsfc.nasa.gov/data/map/dr5/dfp/ilc'
+           '/wmap_ilc_rgn_defn_9yr_v5.fits')]
 
 print "Downloading files..."
 for fname in fnames:
