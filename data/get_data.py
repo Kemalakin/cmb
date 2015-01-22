@@ -7,10 +7,6 @@ jlazear
 
 Pull WMAP data from LAMBDA.
 
-WARNING: Do not use without first setting the current working directory to
-the data directory! This script does not attempt to set the path correctly
-and will happily overwrite files if you have the directory set incorrectly.
-
 Example:
 
 $ cd /path/to/cmb/data
@@ -19,29 +15,38 @@ $ python get_data.py
 __version__ = 20150106
 __releasestatus__ = 'beta'
 
+import inspect
 import os
 import tarfile
 import wget
+
+import lib
+
+# Path to the cmb/data/ directory.
+datapath = os.path.dirname(os.path.abspath(inspect.getfile(lib))) + '/../data/'
+
 
 fnames = [('http://lambda.gsfc.nasa.gov/data/map/dr5/skymaps/9yr/smoothed'
           '/wmap_band_smth_imap_r9_nineyear_v5.tar.gz'),
           ('http://lambda.gsfc.nasa.gov/data/map/dr5/dfp/ilc/wmap_ilc_9yr_v5'
           '.fits'),
           ('http://lambda.gsfc.nasa.gov/data/map/dr5/dfp/ilc'
-           '/wmap_ilc_rgn_defn_9yr_v5.fits')]
+           '/wmap_ilc_rgn_defn_9yr_v5.fits'),
+          ('http://irsa.ipac.caltech.edu/data/Planck/release_1/all-sky-maps'
+           '/maps/COM_CompMap_dust-commrul_0256_R1.00.fits'),]
 
 print "Downloading files..."
 for fname in fnames:
     _, fn = os.path.split(fname)
-    if not os.path.isfile(fn):
+    if not os.path.isfile(datapath + fn):
         print "Downloading file: {0}".format(fname)
-        wget.download(fname)
+        wget.download(fname, out=datapath+fn)
 
 print "Extracting files..."
 for fname in fnames:
     if fname.endswith('tar.gz'):
         _, fn = os.path.split(fname)
         print "Extracting file: {0}".format(fn)
-        tar = tarfile.open(fn)
-        tar.extractall()
+        tar = tarfile.open(datapath + fn)
+        tar.extractall(path=datapath)
         tar.close()

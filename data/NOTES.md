@@ -48,6 +48,8 @@ transformation above). Then smooth as so:
     sigma = 1.*np.pi/180  # Smooth with a 1 degree std dev Gaussian
     ilcTs_smooth = hp.sphtfunc.smoothing(ilcTs, sigma=sigma)
     
+**CAUTION**: hp.smoothing does NOT preserve the mean!  
+    
 and downsample:
 
     ilcTs_smooth_128 = hp.pixelfunc.ud_grade(ilcTs_smooth, 
