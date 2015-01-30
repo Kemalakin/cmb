@@ -33,7 +33,12 @@ fnames = [('http://lambda.gsfc.nasa.gov/data/map/dr5/skymaps/9yr/smoothed'
           ('http://lambda.gsfc.nasa.gov/data/map/dr5/dfp/ilc'
            '/wmap_ilc_rgn_defn_9yr_v5.fits'),
           ('http://irsa.ipac.caltech.edu/data/Planck/release_1/all-sky-maps'
-           '/maps/COM_CompMap_dust-commrul_0256_R1.00.fits'),]
+           '/maps/COM_CompMap_dust-commrul_0256_R1.00.fits'),
+          ('http://lambda.gsfc.nasa.gov/data/map/dr4/dfp/mcmc_maps'
+           '/wmap_mcmc_k_synch_stk_q_7yr_v4p1.fits'),
+          ('http://lambda.gsfc.nasa.gov/data/map/dr4/dfp/mcmc_maps'
+           '/wmap_mcmc_k_synch_stk_u_7yr_v4p1.fits'),
+          ]
 
 print "Downloading files..."
 for fname in fnames:

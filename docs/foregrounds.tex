@@ -239,6 +239,12 @@ system, $E_x$ and $E_y$, and the phase between the E-field components,
 $\phi \equiv \theta_x - \theta_y$)\cite{kamionkowski_statistics_1997}
 to fully specify the polarized light.
 
+\subsection{Random Ensemble}
+\label{sub:random_ensemble}
+
+Let us construct a very naive random ensemble of maps based on the information
+presented so far.
+
 We assume that the circularly polarized component $V$ is
 small\cite{mainini_improved_2013}, so we will set it to 0 and ignore it. This
 leaves us 2 numbers that we need to specify. Since we do not know the true
@@ -256,7 +262,10 @@ so we must sample 1 random number to fully specify each realization. A simple
 uniform sampling of either $Q$ or $U$ does not uniformly sample the space of
 possible $\pc{Q, U}$ values. $Q$ and $U$ describe a circle with radius $I_p$,
 so the space of possible choices of $Q$ and $U$ is a circle, which has only a
-single free parameter, the angle $\theta$. In radial coordinates,
+single free parameter, the angle $\theta$\footnote{Note that the angle
+$\theta$ does not directly correspond to the polarization angle, since the
+Stokes parameters are spin-2. The polarization angle $\gamma$ is related to
+the sampling angle $\theta$ by $\theta = 2\gamma$.}. In radial coordinates,
 
 \begin{equation}
     Q + iU = I_p e^{i\theta}.
@@ -292,6 +301,75 @@ is shown in Fig.~\ref{fig:QU}.
     the above $Q$ map.}
     \label{fig:QU}
 \end{figure}
+
+It is clear that these maps have a nonsensical structure, with far too much
+variation on extremely small scales. Polarized dust in the interstellar medium
+relies on an interstellar magnetic field\cite{lazarian_tracing_2007}, so such
+small scale variations in dust polarization would imply significantly more
+structure on small scales than is consistent with current observations.
+
+\subsection{Synchrotron-tracking Polarization Direction Model}
+\label{sub:synchrotron_tracking_model}
+
+Both synchrotron\cite{rybicki_radiative_1985} and
+dust\cite{lazarian_tracing_2007} depend on the interstellar magnetic field in
+which their photons originate. If both phenomena produce radiation from the
+same region, then they are coupled to the same magnetic field, and hence we
+would expect some correlation between the synchrotron and dust components. In
+particularly, the synchrotron polarization angle should be a tracer of the
+dust polarization angle\cite{delabrouille_pre-launch_2013}.
+
+To this end, we use the WMAP 23 GHz synchrotron component $Q$ and $U$ maps
+and estimate from them the polarization angle,
+
+\begin{equation}
+    \gamma = \frac{1}{2} \arctan{\left( -U, Q \right)}
+\end{equation}
+
+where we follow the convention of Delabrouille et al. for the orientation of
+the Stokes parameters. Following Delabrouille et al., we smooth the $Q$ and
+$U$ maps to $3^\circ$ before computing the polarization angle map $\gamma(p)$.
+We note that the polarization angle map is independent of frequency.
+
+These angle maps may then be applied to the polarization intensity maps of
+Section~\ref{sec:polarized_dust_intensity} to get the $Q$ and $U$ components
+of the polarized dust,
+
+\begin{align}
+    Q(p) = I_p(p) \cos{2\gamma(p)} = p_\mathrm{max} I_\nu(p) \cos{2\gamma(p)}\\
+    U(p) = I_p(p) \sin{2\gamma(p)} = p_\mathrm{max} I_\nu(p) \sin{2\gamma(p)}.
+\end{align}
+
+The resulting polarization angle map $\gamma(p)$ and example $Q$ and $U$ dust
+foreground maps at 353 GHz are shown in Figure~\ref{fig:gammaQU}.
+
+\begin{figure}[th]
+    \begin{center}
+        \includegraphics[height=0.3\textheight]{img/gamma}
+        \includegraphics[height=0.3\textheight]{img/gammaQ}
+        \includegraphics[height=0.3\textheight]{img/gammaU}
+    \end{center}
+    \caption{\emph{Top}: The polarization angle map $\gamma(p)$. The map is
+    smoothed to $3^\circ$. \emph{Middle}: The resulting polarized dust
+    foreground $Q$ map at 353 GHz. \emph{Bottom}: The resulting polarized
+    dust foreground $U$ map at 353 GHz.}
+    \label{fig:gammaQU}
+\end{figure}
+
+We note that this smoothing procedure suppresses power at angular scales
+smaller than $3^\circ$, corresponding to supressing power at $\ell \gtrsim
+60$. A Planck analysis\cite{planck_collaboration_planck_2014-2} of
+mid-latitude dust at 353 GHz suggests that there is still a significant amount
+of power on these scales. One possible method of incorporating this would be
+to simply extend the power spectrum of our dust maps using the power law
+scaling found by Planck,
+
+\begin{equation}
+    D_\ell^{X\!X} = A^{X\!X}(\ell/80)^{\alpha_{X\!X} + 2}
+\end{equation}
+
+where $\alpha_{X\!X} = -2.42 \pm 0.02$, $X \in \{E, B\}$, and then
+reconstructing the map from the power spectra.
 
 \bibliography{foregrounds}
 \bibliographystyle{plain}

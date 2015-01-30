@@ -47,3 +47,8 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Images and data files
+*.png
+*.fits
+

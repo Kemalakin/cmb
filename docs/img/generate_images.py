@@ -57,6 +57,7 @@ else:
 
     print strtemplate.format('Planck 353 GHz dust map', fname)
     fig.savefig(fname)
+    fig.clf()
 
 
 # cb9_f22_M.png
@@ -88,6 +89,7 @@ else:
 
     print strtemplate.format('Simple polarized dust map', fname)
     fig.savefig(fname)
+    fig.clf()
 
 
 # QU.png
@@ -110,9 +112,54 @@ else:
     hp.mollview(Qmap, fig=1, nest=True, norm='hist', unit='MJy/sr', title='')
     print strtemplate.format('Simple Q map', fnameQ)
     fig.savefig(fnameQ)
+    fig.clf()
 
     fig = plt.figure(1)
     hp.mollview(Umap, fig=1, nest=True, norm='hist', unit='MJy/sr', title='')
     print strtemplate.format('Simple U map', fnameU)
     fig.savefig(fnameU)
+    fig.clf()
 
+
+#gammaQU
+fnames = [imgpath + 'gamma.png', imgpath + 'gammaQ.png', imgpath + 'gammaU.png']
+allthere = all(map(os.path.isfile, fnames))
+if allthere and not force:
+    for fname in fnames:
+        print strexists.format(fname)
+else:
+    # dust353map = lib.foregrounds.generate_simple_dust_map()
+    # pfrac = 0.2
+    # poldustmap = pfrac*dust353map
+    # mapnames = ['wmap_mcmc_k_synch_stk_q_7yr_v4p1.fits',
+    #             'data/wmap_mcmc_k_synch_stk_u_7yr_v4p1.fits']
+    # wmapQ, wmapU = lib.wmap.load_wmap_maps_QU(mapnames, Nside=256, n2r=True)
+    # gamma = lib.foregrounds.generate_polarization_angle_map(wmapQ, wmapU,
+    #                                                         sigma=3.*np.pi/180)
+    # Qmap = poldustmap*np.cos(2*gamma)
+    # Umap = poldustmap*np.sin(2*gamma)
+
+    QUmaps = lib.foregrounds.generate_synchro_traced_dust_QU_map(
+        sigma=3.*np.pi/180)
+    gamma = 0.5*np.arctan2(-QUmaps[0], QUmaps[1])
+
+    fnamegamma, fnameQ, fnameU = fnames
+    fig = plt.figure(1)
+    hp.mollview(gamma, fig=1, nest=True, unit='radians', title='')
+    print strtemplate.format('Pol Dust Angle map', fnamegamma)
+    fig.savefig(fnamegamma)
+    fig.clf()
+
+    fig = plt.figure(1)
+    hp.mollview(QUmaps[0], fig=1, nest=True, unit='MJy/sr', norm='hist',
+                title='')
+    print strtemplate.format('Q map from synch angle', fnameQ)
+    fig.savefig(fnameQ)
+    fig.clf()
+
+    fig = plt.figure(1)
+    hp.mollview(QUmaps[1], fig=1, nest=True, unit='MJy/sr', norm='hist',
+                title='')
+    print strtemplate.format('U map from synch angle', fnameU)
+    fig.savefig(fnameU)
+    fig.clf()
