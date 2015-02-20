@@ -83,12 +83,17 @@
 \newcommand{\pb}[1]{\left[ #1 \right]}
 \newcommand{\pc}[1]{\left\{ #1 \right\} }
 \newcommand{\dd}[0]{\mathrm{d}}
+\newcommand{\Tcmb}[0]{T_\mathrm{CMB}}
+\newcommand{\dBdT}[0]{\left.\left( \pderiv{B_\nu}{T} \right) \right|_{\Tcmb}}
+\newcommand{\dBdTexpr}[0]{\frac{2 h^2 \nu^4}{k_B c^2 T^2} \frac{\exp{\pp{\frac{h\nu}{k_B T}}}}{\pb{\exp{\pp{\frac{h\nu}{k_B T}}} - 1}^2}}
+\newcommand{\dBdTcmbexpr}[0]{\frac{2 h^2 \nu^4}{k_B c^2 \Tcmb^2} \frac{\exp{\pp{\frac{h\nu}{k_B \Tcmb}}}}{\pb{\exp{\pp{\frac{h\nu}{k_B \Tcmb}}} - 1}^2}}
+\newcommand{\Kcmb}[0]{K_\mathrm{CMB}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \title{\doctitle}
 \author{\myname}
-\date{Jan 20, 2015}
+\date{Feb 10, 2015}
 
 \begin{document}
 \maketitle
@@ -171,15 +176,46 @@ in thermodynamic temperature units (K). The conversion between spectral
 intensity $I_\nu$ and thermodynamic temperature $T$ is
 \begin{gather}
     I_\nu = B_\nu(T) = \frac{2h\nu^3}{c^2} \frac{1}{\exp{\left( h\nu/k_B T \right)} - 1} \\
-    T = B_\nu^{-1}(I_\nu) = \frac{h\nu}{k_B} \frac{1}{\log{(1 + \frac{2h\nu^3}{I_\nu c^2})}}
+    T = B_\nu^{-1}(I_\nu) = \frac{h\nu}{k_B} \frac{1}{\log{(1 + \frac{2h\nu^3}{I_\nu c^2})}}.
 \end{gather}
 
-so our power law (Eq.~\eqref{eq:dust_power_law}) gives us the transformation
-\begin{align}
-    T & = B_\nu^{-1} \left( I_{\nu_0} \left( \frac{\nu}{\nu_0} \right)^\beta \right) \notag \\
-    T & = \frac{h\nu}{k_B} \frac{1}{\log{(1 + \frac{2 h \nu^{3-\beta}}{c^2 \nu_0^{-\beta}} \frac{1}{I_{\nu_0}})}} \\
-    T & = \frac{h\nu}{k_B} \frac{1}{\log{\pb{ 1 + \pp{\frac{\nu}{\nu_0}}^{3-\beta} \pp{\exp \frac{h\nu_0}{k_B T_0} - 1} }}}
-\end{align}
+However, we already have a temperature reference, the CMB at
+$T = \unit[2.72548]{K}$\cite{fixsen_temperature_2009}. So rather than treat the
+foregrounds as a separate temperature, we treat it as a perturbation of the
+CMB temperature, i.e.
+
+\begin{equation}
+    I_\mathrm{CMB} + I_\mathrm{fg} = B_\nu(\Tcmb + \Delta T) = B_\nu(\Tcmb) + \dBdT \Delta T
+\end{equation}
+
+to first order. We identify $I_\mathrm{CMB} = B_\nu{\Tcmb}$ as the relation
+describing the thermodynamic temperature of the CMB, which leaves us with the
+relationship between the foreground spectral intensity in spectral intensity
+units and what we will call \emph{CMB temperature} units, denoted by
+$\unit{\Kcmb}$,
+
+\begin{equation}
+    I_\mathrm{fg} = \dBdT \Delta T = \pp{\dBdTcmbexpr} \Delta T
+\end{equation}
+
+We note that $\dBdT$ is still a function of $\nu$, so the conversion will
+still depend on the frequency band of interest. We also note that the power
+law scaling of thermal dust intensity (Eq.~\eqref{eq:dust_power_law}) cannot
+easily be written in CMB temperature units, since the conversion factor
+scales with frequency. The power law scaling should be done in spectral
+intensity units and then converted to CMB temperature units.
+
+Some conversion factors for our frequencies of interest,
+
+\begin{align*}
+    \dBdT\!\!\!\!\!\!(\unit[200]{GHz}) & = \unit[478]{\frac{MJy/sr}{\Kcmb}} \\
+    \dBdT\!\!\!\!\!\!(\unit[270]{GHz}) & = \unit[444]{\frac{MJy/sr}{\Kcmb}} \\
+    \dBdT\!\!\!\!\!\!(\unit[350]{GHz}) & = \unit[302]{\frac{MJy/sr}{\Kcmb}} \\
+    \dBdT\!\!\!\!\!\!(\unit[600]{GHz}) & = \unit[32]{\frac{MJy/sr}{\Kcmb}} \\
+\end{align*}
+
+Henceforth, we shall drop the CMB subscript and any mention of temperatures in
+$\unit{K}$ will refer to the CMB temperature in $\unit{\Kcmb}$.
 
 \section{Polarized Dust Intensity}
 \label{sec:polarized_dust_intensity}
@@ -207,10 +243,7 @@ We may then construct a polarized intensity map
 \end{equation}
 
 where $p$ here is the pixel index and $p_\mathrm{max} = 20\%$ is the maximum
-polarization fraction. Note that this procedure should be done in spectral
-intensity units rather than thermodynamic temperature units, since the
-conversion is nonlinear,
-$B_\nu^{-1}(p_\mathrm{max}I_\nu) \neq p_\mathrm{max} B_\nu^{-1}(I_\nu)$.
+polarization fraction.
 
 \begin{figure}[th]
     \begin{center}

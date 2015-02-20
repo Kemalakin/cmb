@@ -38,6 +38,8 @@ fnames = [('http://lambda.gsfc.nasa.gov/data/map/dr5/skymaps/9yr/smoothed'
            '/wmap_mcmc_k_synch_stk_q_7yr_v4p1.fits'),
           ('http://lambda.gsfc.nasa.gov/data/map/dr4/dfp/mcmc_maps'
            '/wmap_mcmc_k_synch_stk_u_7yr_v4p1.fits'),
+          ('http://lambda.gsfc.nasa.gov/data/map/dr5/dcp/spectra'
+           '/wmap_tt_spectrum_9yr_v5.txt'),
           ]
 
 print "Downloading files..."

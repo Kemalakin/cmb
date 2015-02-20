@@ -1,0 +1,140 @@
+%%% cmb.tex ---
+
+\documentclass[twoside,10pt]{article}
+
+% \usepackage{epsfig}
+\usepackage{color}
+\usepackage{fancyhdr}
+\usepackage{rotating}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{cool}
+\usepackage{mathrsfs}
+\usepackage{units}
+\usepackage{amsmath}
+\usepackage{subfig}
+\usepackage{hyperref}
+\Style{DSymb={\mathrm d},IntegrateDifferentialDSymb=\text{d}}
+
+% define formatting
+% A4 paper is 210 x 297 mm
+% pt  point         (1 in = 72.27 pt)
+% pc  pica          (1 pc = 12 pt)
+% in  inch          (1 in = 25.4 mm)
+% bp  big point     (1 in = 72 bp)
+% cm  centimetre    (1 cm = 10 mm)
+% mm  millimetre
+% dd  didot point   (1157 dd = 1238 pt)
+% cc  cicero        (1 cc = 12 dd)
+% sp  scaled point  (65536 sp = 1 pt)
+% em  the width of the letter M in the current font
+% ex  the height of the letter x in the current font
+
+\setlength{\textheight}{11.in}
+\setlength{\textwidth}{8.5in}
+
+\setlength{\topmargin}{0.in}
+\setlength{\headheight}{\baselineskip}
+\setlength{\headsep}{2\baselineskip}
+
+\addtolength{\textheight}{-\headheight}
+\addtolength{\textheight}{-\headsep}
+\addtolength{\textheight}{-2.in}
+\addtolength{\textwidth}{-2.in}
+
+
+\setlength{\oddsidemargin}{0.in}
+\setlength{\evensidemargin}{0.in}
+
+\setlength{\parindent}{0.em}
+\setlength{\parskip}{0.75\baselineskip}
+
+\def\boxwidth{\textwidth}
+\def\doctitle{Cosmic Microwave Background $I$, $Q$, and $U$ Sky Generation}         % Document title defined here
+\def\myname{Justin Lazear}      % Primary author defined here
+\def\myemail{\texttt{jlazear@pha.jhu.edu}} % Primary author email
+\def\piper{\textsc{Piper}}
+\def\tablefont{\footnotesize}
+
+% \renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+%% \pagestyle{fancy}
+%% \fancyhead{}
+%% \fancyhead[LE,RO]{{\it {\large \thepage}}}
+%% \fancyhead[RE]{{\it {\large \myname{}}}}
+%% \fancyhead[LO]{{\it {\large \doctitle{}}}}
+%% \fancyfoot{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Define some math macros for convenience
+
+% Note that most necessarily math macros are defined by the cool
+% package, so this section is sparse.
+
+\newcommand{\ve}[1]{\mathbf{#1}}
+\newcommand{\Avg}[1]{\left< #1 \right>}
+\newcommand{\pp}[1]{\left( #1 \right)}
+\newcommand{\pb}[1]{\left[ #1 \right]}
+\newcommand{\pc}[1]{\left{ #1 \right} }
+\newcommand{\dd}[0]{\mathrm{d}}
+\newcommand{\ClTT}[0]{C_\ell^{TT}}
+\newcommand{\ClTE}[0]{C_\ell^{TE}}
+\newcommand{\ClEE}[0]{C_\ell^{EE}}
+\newcommand{\ClBB}[0]{C_\ell^{BB}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{\doctitle}
+\author{\myname\
+  \small \myemail}
+\date{Feb 4, 2015}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+\label{sec:intro}
+
+We require a realization of the Cosmic Microwave Background (CMB) in both
+intensity and polarization. We briefly discuss here the simplified methods
+used to generate sky realizations of the CMB in $I$, $Q$, and $U$. The details
+of the CMB sky are not important for this project, so more sophisticated
+models are not required.
+
+\section{CLASS}
+\label{sec:class}
+
+The Cosmic Linear Anisotropy Solving System
+(CLASS)\footnote{\url{http://class-code.net}} software package is used to
+generate power spectra ($\ClTT$, $\ClEE$, $\ClBB$, $\ClTE$). We use only a
+small fraction of the power of CLASS, using primarily default parameters.
+This is done because the things we would like to investigate here (e.g.
+foreground removal, calibration sensitivity) are not sensitive to the details
+of the CMB that is created, so there is no need to generate sophisticated
+CMB skies. We note that the default parameters should show agreement with
+the Planck 2013 parameters\cite{planck_collaboration_planck_2014}. The
+parameters actually used are stored in
+\texttt{data/lcdm\_planck\_2013\_parameters.ini}, which is also a valid input
+file to CLASS. The resulting power spectra (both including and excluding
+gravitational lensing) are also stored in the \texttt{data} directory.
+
+\section{HEALPix and synfast}
+\label{sec:healpix_and_synfast}
+
+The power spectra are then read into Python and the \texttt{synfast} routine
+of HEALPix\cite{gorski_healpix:_2005} is used to generate a realization of
+the power spectrum in map space. In particular, the
+\texttt{healpy}\footnote{\url{http://healpy.readthedocs.org}} interface to
+HEALPix is used. We note that the \texttt{healpy.synfast} function requires
+the power spectra to include $\ell = 0$ and $\ell = 1$ elements, even though
+they are 0 (and thus typically excluded from Boltzmann codes like CLASS). We
+extend the power spectar to include these elements (with value 0) before
+passing them into \texttt{healpy.synfast}.
+
+\bibliography{cmb}
+\bibliographystyle{plain}
+
+\end{document}

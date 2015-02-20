@@ -79,7 +79,7 @@ def _compute_ilc_weights(maps):
     return w
 
 
-def ilc_map_from_weights(maps, weights, regions_map, sigma=1.5*np.pi/180,
+def ilc_map_from_weights(maps, weights, regions_map=None, sigma=1.5*np.pi/180,
                          return_weights_map=False):
     """
     Construct an ILC map from a set of raw temperature maps, a set of weights
@@ -89,6 +89,9 @@ def ilc_map_from_weights(maps, weights, regions_map, sigma=1.5*np.pi/180,
     (Nregions, Nfreq). `regions_map` must have shape (Npix,) and each pixel
     should contain the integer identifier to which region the pixel is
     assigned.
+
+    If `regions_map` is None, simply performs the linear combination of the
+    maps according to the weights. #TODO NEEDS TO BE IMPLEMENTED
 
     `sigma` is the smoothing factor to reduce edge effects. It is applied to
     each region's weight map before multiplying into the raw maps. See

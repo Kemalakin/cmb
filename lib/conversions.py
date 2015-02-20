@@ -25,9 +25,9 @@ kB = 1.3806488e-23  # m^2*kg/s^2 K
 MJypsr = 1.e-20     # MJy/sr per W/m^2 sr Hz
 
 
-def B(T_CMB, nu):
+def B(T, nu):
     """
-    The Planck distribution. Converts from thermodynamic temperature (K_CMB)
+    The Planck distribution. Converts from thermodynamic temperature (K)
     units to spectral intensity (W/m^2 sr Hz) units.
 
     Divide the output of this function by MJypsr (=1.e-20) to get spectral
@@ -35,18 +35,18 @@ def B(T_CMB, nu):
 
     Returns the spectral intensity in W/m^2 sr Hz.
     """
-    return (2*h*nu**3/(c**2)) / (np.exp(h*nu/(kB*T_CMB)) - 1)
+    return (2*h*nu**3/(c**2)) / (np.exp(h*nu/(kB*T)) - 1)
 
 
 def Binv(I, nu):
     """
     The inverse of the Planck distribution function. Converts from spectral
-    intensity units (W/m^2 sr Hz) to thermodynamic temperature units (K_CMB).
+    intensity units (W/m^2 sr Hz) to thermodynamic temperature units (K).
 
     If the input is in MJy/sr, you must first multiply by MJypsr (=1.e-20)
     before applying this function.
 
-    Returns the thermodynamic temperature in K_CMB.
+    Returns the thermodynamic temperature in K.
     """
     return (h*nu/kB) / np.log(1 + 2*h*nu**3/(I*c*c))
 
@@ -72,8 +72,27 @@ def Bapprox(T_A, nu):
     (W/m^2 sr Hz).
 
     Divide the output of this function by MJypsr (=1.e-20) to get spectral
-    intensity in MJy/sr
+    intensity in MJy/sr.
 
     Returns the spectral intensity in W/m^2 sr Hz.
     """
     return 2*nu*nu*kB*T_A/(c*c)
+
+def dBdT(nu, T=2.72548):
+    """
+    The first order conversion factor between CMB temperature units (K_CMB) and
+    spectral intensity units (W/m^2 sr Hz), dB/dT.
+
+    The reference temperature may be set with `T`, and is by default the CMB
+    temperature (Fixsen 2009).
+
+    Divide the output of this function by MJypsr (=1.e-20) to get spectral
+    intensity in terms of MJy/sr.
+
+    Since this is a linear conversion (in intensity or temperature units), one
+    may get the inverse conversion with 1/dBdT.
+
+    Returns the spectral intensity per CMB temperature in (W/m^2 sr Hz)/K_CMB.
+    """
+    x = np.exp(h*nu/(kB*T))
+    return 2*h*h*(nu**4)/(kB*c*c*T*T) * x/((x - 1)**2)
