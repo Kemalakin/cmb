@@ -22,7 +22,7 @@ c = 299792458.      # m/s
 h = 6.62606957e-34  # m^2*kg/s
 kB = 1.3806488e-23  # m^2*kg/s^2 K
 
-MJypsr = 1.e-20     # MJy/sr per W/m^2 sr Hz
+MJypsr = 1.e-20     # (W/m^2 sr Hz) per MJy/sr
 
 
 def B(T, nu):

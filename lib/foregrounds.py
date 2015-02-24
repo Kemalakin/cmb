@@ -68,6 +68,7 @@ def generate_simple_dust_map(nu=353.e9, beta=1.6, Nside=256, clean_map=True,
 
     nu0 = 353.e9  # 353 GHz
     factor = (nu/nu0)**beta
+    print "freq = {0} GHz, factor = {1}".format(nu/1.e9, factor) #DELME
     map = factor*map
 
     if Nside != 256:

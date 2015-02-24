@@ -16,6 +16,8 @@ __version__ = 20150203
 __releasestatus__ = 'beta'
 
 import os
+import subprocess
+import tempfile
 
 import numpy as np
 import healpy as hp
@@ -52,7 +54,7 @@ def get_params_from_file(fname):
     return paramdict
 
 
-def get_lcdm_dls(lensed=True):
+def get_dls(lensed=True, fname=None):
     """
     Returns a dictionary of Dl's in units of uK^2.
 
@@ -75,16 +77,28 @@ def get_lcdm_dls(lensed=True):
 
     Also note that these must be converted to Cl's (see above formula) before
     being passed into healpy.synfast.
+
+    By default uses the file 'data/lcdm_planck_2013_cl_lensed.dat',
+    which must be located in the data directory. If lensed is false,
+    uses 'data/lcdm_planck_2013_cl.dat' If a `fname` is specified, searches for
+    that file and attempts to use it. Note that all paths are specified
+    relative to the base directory of the cmb package.
     """
-    lstr = '_lensed' if lensed else ''
-    clsfname = datapath + 'lcdm_planck_2013_cl{0}.dat'.format(lstr)
-    # lcdmparams = datapath + 'lcdm_planck_2013_parameters.ini'
-    cls = np.loadtxt(clsfname)
-    # NOTE: The next 3 lines are only necessary if the Cl data files are in
-    #       CLASS format. They are currently in CAMB format, so unnecessary.
-    # pdict = get_params_from_file(lcdmparams)
-    # T_cmb = pdict['T_cmb']*1.e6   # uK
-    # cls[..., 1:5] = cls[..., 1:5]*T_cmb*T_cmb   # uK^2
+    if fname is None:
+        fname = 'data/lcdm_planck_2013_cl.dat'
+    if fname.endswith('.dat'):
+        fname, _ = fname.rsplit('.', 1)
+    if (not fname.endswith('_lensed')) and lensed:
+        fname = fname + '_lensed'
+    clsfname = cmbpath + fname + '.dat'
+    try:
+        cls = np.loadtxt(clsfname)
+    except IOError:
+        fnamebase, _ = fname.rsplit('.', 1)
+        fnamebase, _ = fname.rsplit('_lensed', 1)
+        fnamebase, _ = fname.rsplit('_cl', 1)
+        generate_cls(fnamebase + '.ini', output=fnamebase)
+        cls = np.loadtxt(clsfname)
 
     pdict = {}
     names = ['ell', 'TT', 'EE', 'BB', 'TE']#, 'dd', 'dT', 'dE']
@@ -96,7 +110,7 @@ def get_lcdm_dls(lensed=True):
     return pdict
 
 
-def get_lcdm_cls(lensed=True):
+def get_cls(lensed=True, fname=None):
     """
     Returns a dictionary of Cl's in units of uK^2.
 
@@ -116,8 +130,14 @@ def get_lcdm_cls(lensed=True):
     Note that the data is extended to include the ell = 0 and ell = 1 bins,
     since healpy.synfast expects the input Cl's to range from 0 to lmax. The
     extended data values are simply 0.
+
+    By default uses the file 'data/lcdm_planck_2013_cl_lensed.dat',
+    which must be located in the data directory. If lensed is false,
+    uses 'data/lcdm_planck_2013_cl.dat' If a `fname` is specified, searches for
+    that file and attempts to use it. Note that all paths are specified
+    relative to the base directory of the cmb package.
     """
-    pdict = get_lcdm_dls(lensed=lensed)
+    pdict = get_dls(lensed=lensed, fname=fname)
     ells = pdict['ell'][1:]
     for key, value in pdict.items():
         if key != 'ell':
@@ -125,7 +145,7 @@ def get_lcdm_cls(lensed=True):
     return pdict
 
 
-def generate_lcdm_T_map(Nside=512, lensed=True, n2r=False):
+def generate_T_map(Nside=512, lensed=True, n2r=False, fname=None):
     """
     Generates a realization of the standard LCDM CMB temperature map,
     using parameters that should agree with Planck 2013, in units of uK,
@@ -139,14 +159,15 @@ def generate_lcdm_T_map(Nside=512, lensed=True, n2r=False):
     If `lensed` is True, uses the lensed Cl's. Otherwise uses the unlensed
     Cl's.
     """
-    Cl_TTs = get_lcdm_cls(lensed=lensed)['TT']
+    Cl_TTs = get_cls(lensed=lensed, fname=fname)['TT']
     TTmap = hp.synfast(Cl_TTs, nside=Nside)
     if not n2r:
         TTmap = hp.reorder(TTmap, r2n=True)
     return TTmap
 
 
-def generate_lcdm_maps(Nside=512, lensed=True, n2r=False, return_cls=False):
+def generate_maps(Nside=512, lensed=True, n2r=False, return_cls=False,
+                       fname=None):
     """
     Generates a realization of the standard LCDM CMB T, Q, and U maps,
     using parameters that should agree with Planck 2013, in units of uK,
@@ -165,7 +186,7 @@ def generate_lcdm_maps(Nside=512, lensed=True, n2r=False, return_cls=False):
 
         D_\ell^{XX} = \frac{\ell(\ell+1)}{2\pi} C_\ell^{XX}
     """
-    cldict = get_lcdm_cls(lensed=lensed)
+    cldict = get_cls(lensed=lensed, fname=fname)
     cls = [cldict[xx] for xx in ('TT', 'EE', 'BB', 'TE')]
     maps = list(hp.synfast(cls, nside=Nside, pol=True, new=True))
     if not n2r:
@@ -176,3 +197,44 @@ def generate_lcdm_maps(Nside=512, lensed=True, n2r=False, return_cls=False):
     else:
         return maps
 
+
+def generate_cls(input='data/lcdm_planck_2013_parameters.ini', output=None,
+                 force_camb_format=True):
+    """
+    Uses CLASS to generate a set of Cl's corresponding to the cosmology
+    specified by the `input` file.
+
+    User must have `class` available on the path.
+
+    All filenames are specified relative to the base directory of the cmb
+    package.
+
+    If `output` is specified, sets the root field of `class` to `output`
+    before running `class`.
+    """
+    if (output is None) and (not force_camb_format):
+        toexc = r'class {0}'.format(input)
+        # Why shell=True required?
+        return subprocess.check_output(toexc, cwd=cmbpath, shell=True)
+
+    with tempfile.NamedTemporaryFile(suffix='.ini', bufsize=1) as tf:
+        with open(input) as f:
+            foundoutput = False
+            foundformat = False
+            for line in f:
+                if (output is not None) and line.startswith('root'):
+                    foundoutput = True
+                    line = 'root = {0}\n'.format(output)
+                elif force_camb_format and line.startswith('format'):
+                    foundformat = True
+                    line = 'format = camb\n'
+                tf.write(line)
+
+            if not foundoutput:
+                tf.write('root = {0}\n'.format(output))
+            if not foundformat:
+                tf.write('format = camb\n')
+
+        # Why shell=True required?
+        return subprocess.check_output(r'class {0}'.format(tf.name),
+                                       cwd=cmbpath, shell=True)

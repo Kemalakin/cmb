@@ -22,16 +22,17 @@ import healpy as hp
 import lib
 
 
-def polarized_ilc_reconstruction(frequencies, Nside=512):
+def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
+                                 lensed=False):
     frequencies = np.array(frequencies)
 
     # Construct CMB maps from spectra
-    (Tmap, Qmap, Umap), cldict = lib.cmb.generate_lcdm_maps(Nside=Nside,
-                        n2r=True, return_cls=True)
+    (Tmap, Qmap, Umap), cldict = lib.cmb.generate_maps(Nside=Nside,
+                        n2r=True, return_cls=True, fname=fname, lensed=lensed)
     cmbQUmaps = np.vstack([Qmap, Umap])  # uK
 
     # 3 deg smoothed QU polarized synchrotron-tracking dust maps
-    MJypsr = lib.conversions.MJypsr
+    MJypsr = lib.conversions.MJypsr  # W/(m^2 Hz sr) per MJy/sr
     convs = [1.e6/(lib.conversions.dBdT(f)/MJypsr)  # uK_CMB/(MJy/sr)
              for f in frequencies]
 
