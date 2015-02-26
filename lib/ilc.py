@@ -68,9 +68,9 @@ def _compute_ilc_weights(maps):
     standard ndarray of length k, where k = len(maps) = # frequencies.
     """
     if np.ma.isMaskedArray(maps):
-        covfunc = lambda x: np.ma.compress_cols(np.ma.cov(x))
+        covfunc = lambda x: np.ma.compress_cols(np.ma.cov(x, ddof=0))
     else:
-        covfunc = np.cov
+        covfunc = lambda x: np.cov(x, ddof=0)
     cov = covfunc(maps)
     icov = np.linalg.pinv(cov)  # Naive inversion, since cov ~ k x k is small
     sumicov = icov.sum(0)

@@ -247,7 +247,7 @@ particularly simple form
 where $\left(\cov{\vT, \vT}\right)_{ij} = \cov{T_i, T_j}$\footnote{
 Expectation values are defined over the pixels, so
 \begin{equation*}
-    \Avg{T_i} = \sum_{p=1}^N T_i(p)
+    \Avg{T_i} = \frac{1}{N} \sum_{p=1}^N T_i(p)
 \end{equation*}
 then
 \begin{equation*}
@@ -323,7 +323,7 @@ $\bC$ is a $k \times k$ matrix, where $k$ is the number of frequency bands,
 which is typically order unity. Thus, computing $\vw^*$ from $\bC$ requires
 the inversion of a small matrix and the sum of its components and may be done
 cheaply. Far more expensive is the computation of each element of the matrix
-$\mathrm{C}_{ij} = \sum_{p=1}^N T_i(p) T_j(p) - \sum_{p=1}^N T_i(p) \sum_{p=1}^N T_j(p)$,
+$\mathrm{C}_{ij} = \frac{1}{N} \sum_{p=1}^N T_i(p) T_j(p) - \frac{1}{N^2}\sum_{p=1}^N T_i(p) \sum_{p=1}^N T_j(p)$,
 which is $\mathcal{O}(4N)$. Given that matrix inversion of $\bC$ is
 pessimistically $\mathcal{O}(k^3)$ and $N = 12N_\mathrm{side}^2$, our total
 complexity is $\mathcal{O}(48N_\mathrm{side}^2 + k^3)$.
