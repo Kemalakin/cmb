@@ -1,0 +1,545 @@
+%%% noise.tex ---
+
+\documentclass[twoside,10pt]{article}
+
+% \usepackage{epsfig}
+\usepackage{color}
+\usepackage{fancyhdr}
+\usepackage{rotating}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{cool}
+\usepackage{mathrsfs}
+\usepackage{units}
+\usepackage{amsmath}
+\usepackage{subfig}
+\Style{DSymb={\mathrm d},IntegrateDifferentialDSymb=\text{d}}
+
+% define formatting
+% A4 paper is 210 x 297 mm
+% pt  point         (1 in = 72.27 pt)
+% pc  pica          (1 pc = 12 pt)
+% in  inch          (1 in = 25.4 mm)
+% bp  big point     (1 in = 72 bp)
+% cm  centimetre    (1 cm = 10 mm)
+% mm  millimetre
+% dd  didot point   (1157 dd = 1238 pt)
+% cc  cicero        (1 cc = 12 dd)
+% sp  scaled point  (65536 sp = 1 pt)
+% em  the width of the letter M in the current font
+% ex  the height of the letter x in the current font
+
+\setlength{\textheight}{11.in}
+\setlength{\textwidth}{8.5in}
+
+\setlength{\topmargin}{0.in}
+\setlength{\headheight}{\baselineskip}
+\setlength{\headsep}{2\baselineskip}
+
+\addtolength{\textheight}{-\headheight}
+\addtolength{\textheight}{-\headsep}
+\addtolength{\textheight}{-2.in}
+\addtolength{\textwidth}{-2.in}
+
+
+\setlength{\oddsidemargin}{0.in}
+\setlength{\evensidemargin}{0.in}
+
+\setlength{\parindent}{0.em}
+\setlength{\parskip}{0.75\baselineskip}
+
+\def\boxwidth{\textwidth}
+\def\doctitle{Sky map instrument noise}         % Document title defined here
+\def\myname{Justin Lazear}      % Primary author defined here
+\def\myemail{\texttt{jlazear@pha.jhu.edu}} % Primary author email
+\def\piper{\textsc{Piper}}
+\def\tablefont{\footnotesize}
+
+% \renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+%% \pagestyle{fancy}
+%% \fancyhead{}
+%% \fancyhead[LE,RO]{{\it {\large \thepage}}}
+%% \fancyhead[RE]{{\it {\large \myname{}}}}
+%% \fancyhead[LO]{{\it {\large \doctitle{}}}}
+%% \fancyfoot{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Define some math macros for convenience
+
+% Note that most necessarily math macros are defined by the cool
+% package, so this section is sparse.
+
+\DeclareMathOperator{\rect}{rect}
+\DeclareMathOperator{\sinc}{sinc}
+
+\newcommand{\ve}[1]{\mathbf{#1}}
+\newcommand{\Avg}[1]{\left< #1 \right>}
+\newcommand{\pp}[1]{\left( #1 \right)}
+\newcommand{\pb}[1]{\left[ #1 \right]}
+\newcommand{\pc}[1]{\left{ #1 \right} }
+\newcommand{\dd}[0]{\mathrm{d}}
+\newcommand{\NEP}[0]{\mathrm{NEP}}
+\newcommand{\NET}[0]{\mathrm{NET}}
+\newcommand{\NEQ}[0]{\mathrm{NEQ}}
+\newcommand{\NEU}[0]{\mathrm{NEU}}
+\newcommand{\NEV}[0]{\mathrm{NEV}}
+\newcommand{\kB}[0]{k_\mathrm{B}}
+\newcommand{\KCMB}[0]{K_\mathrm{CMB}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{\doctitle}
+\author{\myname}
+
+\begin{document}
+\maketitle
+
+\section{Sky map instrument noise}
+\label{sec:noise}
+
+Let us estimate here the noise in each sky (healpix) pixel coming from the
+intrinsic noise in each detector pixel.
+
+\subsection{NEP}
+\label{sub:nep}
+
+Detector noise is most conveniently quoted in noise-equivalent power (NEP),
+which is defined as the amount of optical power that must be incident such
+that the signal-to-noise ratio (S/N) is 1. It is a measure of noise in optical
+power units. Note that NEP may be referenced at various different points in
+the instrument, e.g. inside the detector, incident on the detector, incident
+at the aperture of the telescope. The noise (N) component is intrinsic to the
+detector, and so is always referenced to inside the detector. Thus, the S/N =
+1 condition must always be enforced inside the detector. For NEPs referenced
+at some other point, the signal (S) component must first be transferred to
+inside the detector, and then compared. Explicitly,
+
+\begin{description}
+    \item[NEP (strict definition)] \hfill \\
+    The amount of optical signal power incident at the reference
+    point that creates a signal-to-noise ratio of 1 (S/N = 1) as measured
+    inside of the detector.
+\end{description}
+
+From Richards\cite{richards_bolometers_1994}, we note that the noise in a
+bolometer is
+
+\begin{equation}
+    \label{eq:noisepower}
+    \frac{P_N^2}{B} = 2 \int\dd\nu h^2\nu^2 2N(n + n^2) = 2 \int\dd\nu P_\nu h\nu + \int\dd\nu P_\nu^2 \frac{c^2}{A\Omega \nu^2}
+\end{equation}
+
+where the first term on the right hand side corresponds to $n$ and the second
+term corresponds to $n^2$. $B$ is the detector bandwidth, $N$ is the number of
+modes ($N = A\Omega/\lambda^2$, from the Antenna Equation), $n$ is the number
+of photons per mode, the 2 in front of the first integral comes from the
+conversion between integration time and bandwidth (see below and
+Appendix~\ref{sec:bw}), and the 2 inside the integral comes from the 2
+polarization states per photon. The energy per photon is $h\nu$. The term
+$n + n^2$ is the thermal expectation value for the variation in the number of
+photons per mode, $\Avg{(\Delta n)^2} = n + n^2$.
+
+We note that the number of photons per mode is\cite{kittel_thermal_1980}
+
+\begin{equation*}
+    n = \frac{1}{\exp{\left( \frac{h\nu}{\kB T} \right)} - 1}
+\end{equation*}
+
+where $T$ references the signal (sky) temperature, which is the temperature of
+the CMB\cite{fixsen_temperature_2009} in this case, $T = \unit[2.726]{K}$. For
+the 4 \piper\ frequency bands (200, 270, 350, 600 GHz), this gives photon
+numbers $n$
+
+\begin{align*}
+    n = 3\times 10^{-2} & \text{ for } \nu = \unit[200]{GHz} \\
+    9\times 10^{-3} & \text{ for } \nu = \unit[270]{GHz} \\
+    2\times 10^{-3} & \text{ for } \nu = \unit[350]{GHz} \\
+    3\times 10^{-5} & \text{ for } \nu = \unit[600]{GHz}
+\end{align*}
+
+We note that $n \ll 1$ for all frequency bands, so $n^2 \ll n$, and we may
+ignore the second term in Eq.~\eqref{eq:noisepower}. So we use for the noise
+power,
+
+\begin{equation}
+    \label{eq:noisepower2}
+    \frac{P_N^2}{B} = 2 \int\dd\nu P_\nu h\nu
+\end{equation}
+
+where $P_\nu$ is the power spectral density.
+
+Let us compute the NEP inside the detector using this expression. The NEP is
+defined as the amount of power required to give a signal to noise ratio of 1
+when there is 1 Hz of noise bandwidth. Note that the signal bandwidth is
+already implicitly integrated out of this expression. So we have,
+
+\begin{align*}
+    \frac{S}{N} = \frac{\NEP}{P_N(\unit[1]{Hz})} & = 1 \\
+    \NEP & = P_N(\unit[1]{Hz}) \\
+    \NEP^2 & = \left( \unit[1]{Hz} \right) \cdot \frac{P_N^2}{B}
+\end{align*}
+
+Note that in this scenario, NEP has units of W, which strictly matches the
+definition given above. However, it is conventional to fold the 1 Hz of
+noise bandwidth back into the definition of NEP to remind what the scaling
+with bandwidth is and so that a factor of 1 Hz does not need to be carried
+around,
+
+\begin{equation*}
+    \NEP^2_\mathrm{conventional} = \frac{\NEP^2}{\unit[1]{Hz}} = \frac{P_N^2}{B}
+\end{equation*}
+
+where the explicit definition of conventional NEP is
+
+\begin{description}
+    \item[NEP (conventional)] \hfill \\
+    The amount of optical signal power incident at the reference
+    point that creates a signal-to-noise ratio of 1 (S/N = 1) as measured
+    inside of the detector, all divided by $\unit[1]{Hz^{1/2}}$.
+\end{description}
+
+Henceforth, we will use only the conventional NEP and drop the subscript.
+
+Let us now consider a system with detector absorption
+efficiency\footnote{Alternatively called detector absorptivity.} $\eta$ and
+optical efficiency $\tau$, where $0 < \eta, \varepsilon, \tau \leq 1$. These
+parameters make no difference to the NEP referenced inside the detector.
+
+We will compute the NEP referenced to power incident on the detector. The
+signal power incident to the detector will produce an amount of power inside
+the detector that is reduced by the factor $\eta$. So the NEP condition is
+then
+
+\begin{equation*}
+    \frac{\eta \cdot \NEP_D}{P_N} = 1
+\end{equation*}
+
+and we see that the NEP at the detector input is
+
+\begin{equation}
+    \NEP_D^2 = \frac{1}{\eta^2} \frac{P_N^2}{B} = \frac{2}{\eta^2} \int\dd\nu P_\nu h\nu
+\end{equation}
+
+Similarly, the NEP referenced to power incident on the primary of the
+telescope is determined by noting that the power at the primary must pass
+through the optical system, with losses according to the optical efficiency
+$\tau$, and then be absorbed by the detector. So our NEP condition is
+
+\begin{equation*}
+    \frac{\eta \tau \cdot \NEP_P}{P_N} = 1
+\end{equation*}
+
+and the NEP at the telescope input is
+
+\begin{equation}
+    \NEP_P^2 = \frac{1}{\eta^2\tau^2} \frac{P_N^2}{B} = \frac{2}{\eta^2\tau^2} \int\dd\nu P_\nu h\nu
+\end{equation}
+
+We will assume that the NEP inside the detector is known, as it is typically
+measured independently.
+
+As a final note, most of the transformations in this section do not tell us
+how to calculate the noise power of the bolometer, which is an intrinsic
+aspect of the bolometer itself and should be computed from the perspective of
+heat inside the detector. It is a property of the detector that is independent
+of the optical loading, since optical power is converted to heat, and is
+interchangeable with all other sources of heat in the detector (such as
+electrical). Rather, what these transformations tell us is how to translate
+the intrinsic noise in the detector (encoded as NEP inside the detector) to
+reference points outside of the detector. Since the power is transported as
+photons coming out of the detector (in the time-reversed sense), we must
+understand the properties of the photons and how they transport power in order
+to understand how the detector NEP translates to noise at other points. That
+is the purpose of this section.
+
+\subsection{NET, NEQ, NEU, NEV}
+\label{sub:net_neq_neu_nev}
+
+The first quantity we will examine is the noise-equivalent temperature (NET).
+This is the same as the NEP, except in temperature difference units
+($\unit{\KCMB}$)\footnote{Also known as CMB temperature units. See
+\texttt{docs/foregrounds} for a discussion of these units versus regular
+thermodynamic temperature units.}. It is defined as the change in
+thermodynamic temperature of a blackbody at the reference point that would
+generate an amount of optical power in the detector such that the S/N is 1.
+Note that this definition implicitly includes a fair amount of information
+about the instrument, such as the etendue, the optical efficiency, and the
+frequency band. This information is required since we must know how a change
+in the temperature of the sky's photons propagate to the detector, and the
+path of propagation is through the instrument. Also note that we must assume a
+base sky temperature since the spectral distribution of the sky is
+temperature-dependent.
+
+The NET is defined relative to the NEP by
+
+\begin{equation}
+    \NET = \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \text{ in } \unit{\KCMB/\sqrt{Hz}}
+\end{equation}
+
+where $\D{P}{T}$ is the change in optical power incident on the detector due
+to a change in sky temperature. This is straight-forward to compute if we
+first find the power incident on the detector, which is
+
+\begin{equation}
+    P(T) = \int_{\Delta\nu} \dd\nu\ \eta(\nu) \tau(\nu) P_\nu(T) = A\Omega \int_{\Delta\nu} \dd\nu\ \eta(\nu) \tau(\nu) B_\nu(T)
+\end{equation}
+
+where $\Delta\nu$ is the passband and $B_\nu(T)$ is the Planck distribution,
+which we note already includes both polarization modes,
+
+\begin{equation*}
+    B_\nu(T) = \frac{2h}{c^2} \frac{\nu^3}{\exp{\left( \frac{h\nu}{\kB T} \right)}}.
+\end{equation*}
+
+Then $\D{P}{T}$ is given by
+
+\begin{equation*}
+    \D{P}{T} = A\Omega \int_{\Delta\nu} \dd\nu\ \eta(\nu) \tau(\nu) \D{B_\nu(T)}{T}
+\end{equation*}
+
+The derivative of the Planck distribution can be shown to be
+
+\begin{equation*}
+    \D{B_\nu(T)}{T} = \frac{2h^2}{c^2\kB T^2} \frac{\nu^4 \exp\left( \frac{h\nu}{\kB T} \right)}{\left[ \exp\left( \frac{h\nu}{\kB T} \right) - 1 \right]^2}
+\end{equation*}
+
+so
+
+\begin{equation}
+    \D{P}{T} = A\Omega \int_{\Delta\nu} \dd\nu\ \eta(\nu) \frac{2h^2}{c^2\kB T^2} \frac{\nu^4 \exp\left( \frac{h\nu}{\kB T} \right)}{\left[ \exp\left( \frac{h\nu}{\kB T} \right) - 1 \right]^2}
+\end{equation}
+
+which may be put in the more numerically convenient form by using the
+substitution $x = \frac{h}{\kB T} \nu$,
+
+\begin{equation}
+    \D{P}{T} = A\Omega \frac{2\kB}{c^2} \left( \frac{\kB T}{h} \right)^3 \int_{x_1}^{x_2} \dd x\ \eta(x)\tau(x) \frac{x^4 e^x}{\left( e^x - 1 \right)^2}
+\end{equation}
+
+The integral does not have a nice algebraic solution even if $\eta(x)\tau(x)$ is
+constant, but is amenable to quadrature for realistic bandpass functions
+$\eta(x)$. We note, as discussed above, that the etendue ($A\Omega$), the
+band-pass, the efficiency, and the sky temperature are involved in this
+conversion factor.
+
+The units of $P$ is \unit{W}, so $\left[\D{P}{T}\right] = \unit{\frac{W}{\KCMB}}$,
+and
+
+\begin{equation*}
+    \left[ \NET \right] = \left[ \frac{\NEP}{\left( \D{P}{T} \right)} \right] = \unit{\frac{W}{\sqrt{Hz}}} \unit{\frac{K}{W}} = \unit{\frac{K}{\sqrt{Hz}}}
+\end{equation*}
+
+However the conventional unit for NET is $\unit{\KCMB \sqrt{s}}$, for which the
+procedure to get the noise figure in K is to divide by the square root of the
+integration time, i.e. more integration time results in less noise. This is
+conceptually intuitive, since one would expect that the measurement from each
+period of time would be independent, so the number of independent samples
+would go like $f_\mathrm{sample} \cdot T_\mathrm{integration}$, and the noise
+would go down by the square root of the number of independent samples.
+
+We note that formally the units $\unit{\frac{\KCMB}{\sqrt{Hz}}}$ and
+$\unit{\KCMB \sqrt{s}}$ are equivalent. However, the conversion between the two is
+a bit more subtle. We wish to convert between units of bandwidth to units of
+integration time, but due to the Nyquist sampling theorem, we must integrate
+for 2 seconds to get 1 Hz of bandwidth (see Appendix~\ref{sec:bw}). So the correct conversion factor is
+
+\begin{equation*}
+    1 = \frac{\unit[2]{s}}{\unit[1]{Hz^{-1}}}
+\end{equation*}
+
+Then the NET may be written in conventional units as
+
+\begin{equation}
+    \NET = \left( \sqrt{2} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \text{ in } \unit{\KCMB \sqrt{s}}
+\end{equation}
+
+Next let us examine the noise-equivalent Q-parameter (NEQ). Again this is
+simply a unit transformation, this time from temperature intensity units
+($\unit{\KCMB}$) to polarization intensity units (also in $\unit{\KCMB}$). NEQ
+is a noise-equivalent measure of the amount of noise in the measurement of the
+Stokes Q parameter. There is also a noise-equivalent U-parameter (NEU), but it
+is usually identical to NEQ, so typically only NEQ is listed. The conventional
+units of NEQ are the same as NET, $\unit{\KCMB \sqrt{s}}$. There is also a
+noise-equivalent V-parameter (NEV), which has the same units and a similar
+interpretation. It is rarely listed, since the V-parameter is rarely of
+interest.
+
+To convert from NET to NEQ, we note that in order to measure the temperature
+intensity, we need only to measure 1 number. However, to measure the
+polarization, we must measure 3 numbers ($Q$, $U$, and $V$, or equivalently,
+$E_x$, $E_y$, and $\phi$). Because of this, we must split our observation time
+to measuring 3 different things, so for a single parameter, we get only a
+fraction of the observation time. If the observation time is split between
+$Q$, $U$, and $V$ according to the ratios $f_Q$, $f_U$, and $f_V$ (where $0
+\leq f_X \leq 1$ and $f_Q + f_U + f_V = 1$), then we will reduce the
+observation time for $Q$ according to $T_\mathrm{integration} \to f_Q
+T_\mathrm{integration}$ (and similarly for U and V). Then since the number of
+independent measurements is linear in the integration time, $N_\mathrm{obs} =
+f_\mathrm{sample} T_\mathrm{integration}$, we get only a fraction of the
+number of independent samples, $N_\mathrm{obs} \to f_Q N_\mathrm{obs}$. This
+change results in a $1/\sqrt{f_Q}$ increase in noise, since noise goes like
+$1/\sqrt{N_\mathrm{obs}}$. Thus, the generic conversions from NET to NEQ, NEU,
+and NEV are
+
+\begin{align*}
+    \NEQ & = \left( \sqrt{\frac{2}{f_Q}} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \text{ in } \unit{\KCMB \sqrt{s}} \\
+    \NEU & = \left( \sqrt{\frac{2}{f_U}} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \text{ in } \unit{\KCMB \sqrt{s}} \\
+    \NEV & = \left( \sqrt{\frac{2}{f_V}} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \text{ in } \unit{\KCMB \sqrt{s}}
+\end{align*}
+
+For \piper, the VPM modulation strategy results in a demodulation such that
+$\sqrt{f_Q} = \sqrt{f_U} = \frac{4}{3}\sqrt{f_V}$.\footnote{See \piper\
+proposal, if available to you...} Combining this with the normalization
+condition, $f_Q + f_U + f_V = 1$, we see that
+
+\begin{equation}
+    f_Q = f_U = \frac{16}{41} \simeq 0.3902 \qquad\text{and}\qquad f_V = \frac{9}{41} \simeq 0.2195.
+\end{equation}
+
+which gives us the \piper-specific conversions,
+
+\begin{align}
+    \NEQ = \NEU & = \left( \frac{\sqrt{82}}{4} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} = \left( \frac{2.264 \unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \text{ in } \unit{\KCMB \sqrt{s}} \\
+    \NEV & = \left( \frac{\sqrt{82}}{3} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} = \left( \frac{3.018 \unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \text{ in } \unit{\KCMB \sqrt{s}}
+\end{align}
+
+Lastly, note that we have not specified the reference point for the NEP in any
+of these calculations. All of these conversions are independent of the
+efficiencies of the telescope and detector, so moving the reference point of
+the NEP will change the reference point of the derived quantity (e.g. NEQ or
+NEU) in the same way. Thus, the derived quantities (NEQ, NEU, NEV) have
+reference points, and the reference point of the derived quantity is the same
+as the NEP that was used to construct it. Transforming a derived quantity to
+move the reference point is done in the same way that transforming the NEP is
+done.
+
+\subsection{Sensitivity}
+\label{sub:sensitivity}
+
+Now that we have in hand the NEQ, which describes the noise in a given
+detector pixel and how it depends on integration time, we turn to estimating
+the amount of noise in a given sky pixel. We have already accounted for the
+noise properties of the detector (encoded in the NEP), so the frame of the
+detectors is no longer convenient. We are really interested in the noise in
+each sky pixel, not in the noise in each detector pixel, so we must project
+the detector noise back onto the sky. Then we can accumulate the integration
+time in each pixel and get the noise in each sky pixel.
+
+Let us write the NEQ at the telescope input,
+
+\begin{align}
+    \NEQ^2_P & = \left( \frac{2}{f_Q} \frac{\unit{s}}{\unit{Hz^{-1}}} \right) \frac{\NEP^2_P}{\left( \D{P}{T} \right)^2} = \left( \frac{2}{f_Q} \frac{\unit{s}}{\unit{Hz^{-1}}} \right) \frac{1}{\eta^2 \tau^2}\frac{\NEP^2}{\left( \D{P}{T} \right)^2} \notag\\
+    & = \left( \frac{2}{f_Q} \frac{\unit{s}}{\unit{Hz^{-1}}} \right) \frac{1}{\eta^2 \tau^2} \frac{2 \int\dd\nu P_\nu h\nu}{\left[ A\Omega \frac{2\kB}{c^2} \left( \frac{\kB T}{h} \right)^3 \eta \tau \int \dd x \frac{x^4 e^x}{e^x - 1}\right]^2} \notag \\
+    & = \left( \frac{2}{f_Q} \frac{\unit{s}}{\unit{Hz^{-1}}} \right) \frac{1}{\eta^2 \tau^2} \frac{4 A\Omega \left( \frac{\kB T}{h} \right)^5 \eta \tau \int \frac{x^4}{e^x - 1}\ \dd x}{ (A\Omega)^2 \frac{4\kB^2}{c^4} \left( \frac{\kB T}{h} \right)^6 \eta^2 \tau^2 \left[ \int \dd x \frac{x^4 e^x}{e^x - 1}\right]^2} \notag \\
+    \NEQ^2_P & = \left( \frac{2}{f_Q} \frac{\unit{s}}{\unit{Hz^{-1}}} \right) \frac{1}{\eta^3 \tau^3} \frac{I_1}{I_2^2} \frac{h^3 c^2}{\kB^3 T}\frac{1}{A\Omega}
+\end{align}
+
+where $I_1 = \int \dd x \frac{x^4}{e^x - 1}$ and $I_2 = \int \dd x \frac{x^4 e^x}{e^x - 1}$.
+
+% \section{OLD JUNK}
+
+% First we project the noise in a single detector out to the sky. Each pixel
+% looks at a solid angle the size of the beamspot, $\Omega_b$. We must be
+% careful to keep in mind that we are dealing with noise, which adds in
+% quadrature with independent regions, and not pure signal, which adds linearly.
+% If the entire beamspot had a temperature noise of $\unit[1]{\mu K}$, then we
+% would measure a noise on the detector of $\unit[1]{\mu K}$. If we arbitrarily subdivided
+% the beamspot into $M$ different equal-area subregions indexed by $i$, each with
+% independent noise $N_i$ (units of K), then if each subregion has the same noise,
+% then we should end up with the same detector noise (since we're merely counting
+% in a different way). We note that each
+
+% \begin{equation}
+%     \sqrt{\sum_i \frac{1}{M}\left( \unit[1]{\mu K} \right)^2} = \sqrt{\frac{M}{M} \left(\unit[1]{\mu K} \right)^2} = \unit[1]{\mu K}
+% \end{equation}
+
+
+% If the entire
+% beamspot had a changed temperature by $\unit[1]{\mu K}$, then the power incident on
+% the detector would change temperature by $\unit[1]{\mu K}$.
+
+% First we project the noise in a single detector out to the sky. Each pixel
+% looks at a solid angle the size of the beamspot, $\Omega_b$. If the entire
+% beamspot changed temperature by $\unit[1]{\mu K}$, then the power incident on
+% the detector would change temperature by $\unit[1]{\mu K}$. If a subregion
+% inside the beamspot with 1/10th the solid angle changed temperature (with the
+% rest of the beamspot held at fixed temperature), then the subregion would have
+% to change in temperature by $\unit[10]{\mu K}$ to induce a $\unit[1]{\mu K}$
+% change in the power on the detector. Thus, the projection operation changes
+% our units from K to K/sr, and the appropriate scaling factor is $\Omega_b$. We
+% note that this projection is independent of the pixelization scheme, and so
+% the quantity constructed is valid for any pixelation scheme (e.g. HealPIX),
+% and any number of pixels within a scheme (i.e. arbitrary $N_\mathrm{side}$).
+% This quantity is called the sensitivity, or alternatively the sensitivty per
+% beamspot, or other combinations of ``beam'' and ``sensitivity'', and we shall
+% denote it here by $F$,
+
+% \begin{equation}
+%     F = \frac{\NEQ}{\Omega_b} \qquad \text{with units} \qquad \left[ F \right] = \frac{\unit{K \sqrt{s}}}{\unit{sr}}
+% \end{equation}
+
+% Next we accumulate the integration time. Suppose our instrument uniformly
+% measures a solid angle $\Omega_T$ in a period of time $T$. The solid angle
+% $\Omega_T$ covers $N_b = \Omega_T/\Omega_b$ non-overlapping (i.e. independent)
+% beamspots. Thus, we may distribute the integration time period $T$ into $N_b$
+% independent regions, for an integration time per beamspot $T_b$ of
+
+% \begin{equation*}
+%     T_b = \frac{T}{N_b} = \left( \frac{\Omega_b}{\Omega_T} \right) T
+% \end{equation*}
+
+\appendix
+\newpage
+
+\section{Relationship between Integration Time and Bandwidth}
+\label{sec:bw}
+
+Suppose we integrate a signal $x(t)$ for a period of time $T$. This is
+equivalent to filtering the signal with a rect filter,
+
+\begin{equation}
+    h(t) = \rect(t/T) = u(t - \nicefrac{T}{2}) - u(t + \nicefrac{T}{2}),
+\end{equation}
+
+where $u(t)$ is the Heaviside step function. In harmonic space, this filter is
+
+\begin{equation}
+    H(f) = F\{ h(t) \} = T \sinc{( f T )} = T \frac{\sin(\pi f T)}{\pi f T}
+\end{equation}
+
+where we define our fourier transform as
+
+\begin{equation*}
+    F \{ x(t) \} = \int_{-\infty}^\infty \dd f\ x(t) \exp(-2\pi i f t)
+\end{equation*}
+
+The bandwidth of a signal is conventionally defined as the distance in
+frequency space between the first positive and first negative node. We note
+that the sinc function is symmetric and has its first node at $f = 1/T$,
+so the bandwidth is $B = 2/T$. Thus the relationship between integration time
+and bandwidth is
+
+\begin{align*}
+    \unit[T]{seconds\ integration\ time} & \longleftrightarrow \unit[\frac{2}{T}]{Hz\ bandwidth} \\
+    \unit[1]{second\ integration\ time} & \longleftrightarrow \unit[2]{Hz\ bandwidth}
+\end{align*}
+
+and so the conversion between seconds of integration time and Hz of bandwidth is
+
+\begin{equation}
+    1 = \frac{\unit[1]{s}}{\unit[\frac{1}{2}]{Hz^{-1}}} = \frac{\unit[2]{s}}{\unit[1]{Hz^{-1}}}
+\end{equation}
+
+Note that for linear time-invariant (LTI) systems, whether we do the
+integration in the time domain all at once or over a series of bursts, the
+result must be the same. We could simply time-shift all of the individual
+bursts to be right next to each other, thereby recreating the full-width rect.
+
+\bibliography{noise}
+\bibliographystyle{plain}
+
+\end{document}
