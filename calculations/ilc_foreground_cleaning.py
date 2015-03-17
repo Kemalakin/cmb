@@ -16,33 +16,98 @@ Example:
 __version__ = 20150211
 
 
+import inspect
+import os
+
 import numpy as np
 import healpy as hp
 
 import lib
 
 
+datapath = os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(
+    lib))) + '/../data/') + '/'
+
+
 def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
-                                 lensed=False, _debug=False):
+                                 lensed=False, fgfile=None, regnoise=0.,
+                                 verbose=True, _debug=False):
+    """
+    Perform an end-to-end simulation of ILC reconstruction.
+
+    1) Generate a fake polarized CMB sky.
+    2) Load/generate dust maps at all of the specified frequencies.
+    3) Combine the dust maps and (optionally) add map noise.
+    4) Perform ILC on total Q and U maps separately.
+    5) Calculate C_l's from reconstructed Q/U maps.
+    6) Package data into dictionary and return
+
+    `frequencies` - Frequencies at which to construct maps and perform ILC,
+        in Hz
+    `Nside` - Size of HealPIX maps.
+    `fname` - By default uses the file 'data/lcdm_planck_2013_cl_lensed.dat',
+        which must be located in the data directory. If lensed is false,
+        uses 'data/lcdm_planck_2013_cl.dat' If a `fname` is specified, searches
+        for that file and attempts to use it. Note that all paths are specified
+        relative to the base directory of the cmb package.
+    `lensed` - See `fname`.
+    `fgfile` - File to load dust maps from. Default is dust/dust.npy.
+    `regnoise` - Instrument/regularization noise, in uK/(healpix pixel).
+    `verbose` - Be talkative.
+    `_debug` - Also perform ILC in foreground-background space, to faciliate
+        the comparison of results.
+    """
     frequencies = np.array(frequencies)
+    if verbose:
+        print '-'*80
+        print "Performing ILC simulation with frequencies: {0} GHz".format(
+            frequencies/1.e9)
 
     # Construct CMB maps from spectra
+    if verbose:
+        print "Constructing CMB temperature and polarization maps."
     (Tmap, Qmap, Umap), cldict = lib.cmb.generate_maps(Nside=Nside,
                         n2r=True, return_cls=True, fname=fname, lensed=lensed)
     cmbQUmaps = np.vstack([Qmap, Umap])  # uK
 
-    # 3 deg smoothed QU polarized synchrotron-tracking dust maps
-    MJypsr = lib.conversions.MJypsr  # W/(m^2 Hz sr) per MJy/sr
-    convs = [1.e6/(lib.conversions.dBdT(f)/MJypsr)  # uK_CMB/(MJy/sr)
-             for f in frequencies]
+    # Try to load dust from file.
+    if fgfile is None:
+        fgfile = datapath + 'dust.npy'
+    try:
+        dustmaps = np.load(fgfile)
+        if verbose: print "Loaded dust from file: {0}".format(fgfile)
+    except (AttributeError, IOError):
+        if verbose:
+            print "Failed to load dust from file: {0}".format(fgfile)
+            print "Generating new dust maps."
+        # 3 deg smoothed QU polarized synchrotron-tracking dust maps
+        MJypsr = lib.conversions.MJypsr  # W/(m^2 Hz sr) per MJy/sr
+        convs = [1.e6/(lib.conversions.dBdT(f)/MJypsr)  # uK_CMB/(MJy/sr)
+                 for f in frequencies]
 
-    dustmaps = [lib.foregrounds.generate_synchro_traced_dust_QU_map(nu=nu,
-                        Nside=Nside,  n2r=True, sigma=3.*np.pi/180)
-                for nu in frequencies]
-    dustmaps = [dustmaps[i]*convs[i] for i in range(len(dustmaps))]   # uK_CMB
+        dustmaps = [lib.foregrounds.generate_synchro_traced_dust_QU_map(nu=nu,
+                            Nside=Nside,  n2r=True, sigma=3.*np.pi/180)
+                    for nu in frequencies]
+        dustmaps = [dustmaps[i]*convs[i] for i in range(len(dustmaps))]   # uK_CMB
+        dustmaps = np.array(dustmaps)
+        f = fgfile if fgfile else datapath + 'dust.npy'
+        np.save(f, dustmaps)
+        if verbose:
+            print "Saving dust maps to: {0}".format(f)
 
     # Construct CMB + foreground maps
-    totalQUmaps = [cmbQUmaps + dustmap for dustmap in dustmaps]
+    if verbose:
+        print "Combining maps."
+    if regnoise:
+        if verbose:
+            print "Instrument/regularization noise with std dev {0} uK".format(
+                regnoise)
+        noise = regnoise*np.random.randn(*np.shape(cmbQUmaps[0]))
+    else:
+        if verbose:
+            print "No instrument/regularization noise."
+        noise = 0.
+    totalQUmaps = [cmbQUmaps + dustmap + noise for dustmap in dustmaps]
 
     # Perform ILC on each set of Q and U maps
     #
@@ -54,12 +119,15 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
     totalQmaps = np.vstack([totalQUmaps[i][0] for i in range(len(totalQUmaps))])
     totalUmaps = np.vstack([totalQUmaps[i][1] for i in range(len(totalQUmaps))])
 
+    if verbose: print "Performing ILC on Q/U maps separately."
     Qweights = lib.ilc.compute_ilc_weights(totalQmaps)
     Uweights = lib.ilc.compute_ilc_weights(totalUmaps)
 
+    if verbose: print "Reconstructing ILC Q/U maps."
     ilcQmap = np.dot(Qweights, totalQmaps)
     ilcUmap = np.dot(Uweights, totalUmaps)
 
+    if verbose: print "Computing C_l's from reconstructed maps."
     recon_cls = hp.anafast([Tmap, ilcQmap, ilcUmap])  # TT, EE,  BB, TE, EB, TB
     labels = ['TT', 'EE', 'BB', 'TE', 'EB', 'TB']
     recon_cldict = {labels[i]: recon_cls[i] for i in range(len(labels))}
@@ -73,6 +141,9 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
                'frequencies': frequencies}
 
     if _debug:
+        if verbose:
+            print ("Performing analytical ILC simulation in "
+                  "foreground/background space")
         var_Q = np.var(Qmap)
         var_U = np.var(Umap)
 
@@ -122,4 +193,7 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
                      'ilcQmap': ilcQmap2, 'ilcUmap': ilcUmap2}
         retdict['debug'] = debugdict
 
+    if verbose:
+        print "Done with ILC with frequencies {0} GHz!".format(frequencies/1.e9)
+        print '-'*80
     return retdict
