@@ -101,11 +101,11 @@
 \section{Sky map instrument noise}
 \label{sec:noise}
 
-Let us estimate here the noise in each sky (healpix) pixel coming from the
+Let us estimate here the noise in each sky (HealPIX) pixel coming from the
 intrinsic noise in each detector pixel.
 
-\subsection{NEP}
-\label{sub:nep}
+\section{NEP}
+\label{sec:nep}
 
 Detector noise is most conveniently quoted in noise-equivalent power (NEP),
 which is defined as the amount of optical power that must be incident such
@@ -256,8 +256,8 @@ understand the properties of the photons and how they transport power in order
 to understand how the detector NEP translates to noise at other points. That
 is the purpose of this section.
 
-\subsection{NET, NEQ, NEU, NEV}
-\label{sub:net_neq_neu_nev}
+\section{NET, NEQ, NEU, NEV}
+\label{sec:net_neq_neu_nev}
 
 The first quantity we will examine is the noise-equivalent temperature (NET).
 This is the same as the NEP, except in temperature difference units
@@ -288,8 +288,9 @@ first find the power incident on the detector, which is
     P(T) = \int_{\Delta\nu} \dd\nu\ \eta(\nu) \tau(\nu) P_\nu(T) = A\Omega \int_{\Delta\nu} \dd\nu\ \eta(\nu) \tau(\nu) B_\nu(T)
 \end{equation}
 
-where $\Delta\nu$ is the passband and $B_\nu(T)$ is the Planck distribution,
-which we note already includes both polarization modes,
+where we have implicitly defined $P_\nu = \eta \tau A\Omega B_\nu(T)$ as the
+spectral power density, $\Delta\nu$ is the passband and $B_\nu(T)$ is the
+Planck distribution, which we note already includes both polarization modes,
 
 \begin{equation*}
     B_\nu(T) = \frac{2h}{c^2} \frac{\nu^3}{\exp{\left( \frac{h\nu}{\kB T} \right)}}.
@@ -417,8 +418,8 @@ as the NEP that was used to construct it. Transforming a derived quantity to
 move the reference point is done in the same way that transforming the NEP is
 done.
 
-\subsection{Sensitivity}
-\label{sub:sensitivity}
+\section{Map Sensitivity}
+\label{sec:sensitivity}
 
 Now that we have in hand the NEQ, which describes the noise in a given
 detector pixel and how it depends on integration time, we turn to estimating
@@ -429,68 +430,152 @@ each sky pixel, not in the noise in each detector pixel, so we must project
 the detector noise back onto the sky. Then we can accumulate the integration
 time in each pixel and get the noise in each sky pixel.
 
-Let us write the NEQ at the telescope input,
+Let us write the NEQ at the sky. We will assume that there is perfect transfer
+from the sky to the telescope primary, i.e. there are no atmospheric effects
+or CMB secondaries. These would factor in at the transfer from the primary to
+the sky and would require some other efficiency parameter in addition to
+$\eta$ and $\tau$.
+
+\begin{equation*}
+    \NEQ^2_P  = \left( \frac{2}{f_Q} \frac{\unit{s}}{\unit{Hz^{-1}}} \right) \frac{\NEP^2_P}{\left( \D{P}{T} \right)^2} = \left( \frac{2}{f_Q} \frac{\unit{s}}{\unit{Hz^{-1}}} \right) \frac{1}{\eta^2 \tau^2}\frac{\NEP^2}{\left( \D{P}{T} \right)^2}.
+\end{equation*}
+
+Over the course of an experiment, the detector spends some period of time
+looking at each unit of solid angle on the sky. Supposing we have some kind of
+idealized experiment that uniformly sampled a region of the sky with an
+overlap factor $f_s$, then the integration time per unit solid angle is
+
+\begin{equation}
+    t = \frac{f_sT_e}{\Omega_e} = \frac{f_sT_e}{4\pi f_e}\qquad\qquad \left[\unit{\frac{s}{sr}}\right]
+\end{equation}
+
+To get a sense of the meaning of $f_s$, we can imagine two different
+experiments with the same etendue $A\Omega$. The first experiment has a small
+beam $\Omega_1$, and so in the experiment period $T_e$ can only cover the
+experimental region $\Omega_e$ by raster scanning. Each beam spot gets an
+integration time of only $T_e/(\Omega_e/\Omega_1)$. The second experiment has a
+large beam $\Omega_2 > \Omega_1$, and so can cover the experimental region
+more quickly, and so cover it more times in the given experimental period.
+In particular, experiment 2 has an integration time of
+$T_e/(\Omega_e/\Omega_2)$. If experiment 2 followed a similar raster scan
+strategy, it would complete
+$f_s = \frac{T_e/(\Omega_e/\Omega_2)}{T_e/(\Omega_e/\Omega_1)} = \Omega_2/\Omega_1$
+scans in the time experiment 2 took to complete a single scan.
+
+Then as we noted before, the integration period and the number of independent
+samples are related, so we should divide $\NEQ_P$ by $\sqrt{t}$ to get the
+map sensitivity $m$,
 
 \begin{align}
-    \NEQ^2_P & = \left( \frac{2}{f_Q} \frac{\unit{s}}{\unit{Hz^{-1}}} \right) \frac{\NEP^2_P}{\left( \D{P}{T} \right)^2} = \left( \frac{2}{f_Q} \frac{\unit{s}}{\unit{Hz^{-1}}} \right) \frac{1}{\eta^2 \tau^2}\frac{\NEP^2}{\left( \D{P}{T} \right)^2} \notag\\
-    & = \left( \frac{2}{f_Q} \frac{\unit{s}}{\unit{Hz^{-1}}} \right) \frac{1}{\eta^2 \tau^2} \frac{2 \int\dd\nu P_\nu h\nu}{\left[ A\Omega \frac{2\kB}{c^2} \left( \frac{\kB T}{h} \right)^3 \eta \tau \int \dd x \frac{x^4 e^x}{e^x - 1}\right]^2} \notag \\
-    & = \left( \frac{2}{f_Q} \frac{\unit{s}}{\unit{Hz^{-1}}} \right) \frac{1}{\eta^2 \tau^2} \frac{4 A\Omega \left( \frac{\kB T}{h} \right)^5 \eta \tau \int \frac{x^4}{e^x - 1}\ \dd x}{ (A\Omega)^2 \frac{4\kB^2}{c^4} \left( \frac{\kB T}{h} \right)^6 \eta^2 \tau^2 \left[ \int \dd x \frac{x^4 e^x}{e^x - 1}\right]^2} \notag \\
-    \NEQ^2_P & = \left( \frac{2}{f_Q} \frac{\unit{s}}{\unit{Hz^{-1}}} \right) \frac{1}{\eta^3 \tau^3} \frac{I_1}{I_2^2} \frac{h^3 c^2}{\kB^3 T}\frac{1}{A\Omega}
+    m^2 & = \frac{\NEQ^2_P}{t} = \frac{1}{t}\left( \frac{2}{f_Q} \frac{\unit{s}}{\unit{Hz^{-1}}} \right) \frac{1}{\eta^2 \tau^2}\frac{\NEP^2}{\left( \D{P}{T} \right)^2} = \frac{4\pi f_e}{f_sT_e} \left( \frac{2}{f_Q} \frac{\unit{s}}{\unit{Hz^{-1}}} \right) \frac{1}{\eta^2 \tau^2}\frac{\NEP^2}{\left( \D{P}{T} \right)^2} \label{eq:m} \\
+    m & = \frac{1}{\sqrt{t}} \left( \sqrt{\frac{2}{f_Q}} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{1}{\eta \tau} \frac{\NEP}{\left( \D{P}{T} \right)} \qquad\qquad \left[ \unit{\KCMB \sqrt{sr}} \right]
 \end{align}
 
-where $I_1 = \int \dd x \frac{x^4}{e^x - 1}$ and $I_2 = \int \dd x \frac{x^4 e^x}{e^x - 1}$.
+We note that $m$ has units of $[m] = \unit{\KCMB \sqrt{sr}}$. It represents the
+amount of noise one would get in a region that subtends a particular solid
+angle. Larger regions require more integration time, and so their noise is
+reduced. Put another way, 1 second of integration time can measure a region of
+a particular size (in solid angle) to some fixed amount of precision. To
+measure a larger region (in solid angle), one must put together many of these
+fixed size regions. Since each subregion is uncorrelated, this involves
+combining the fluctuations of many random variables, which reduces the total
+variance of the whole region.
 
-% \section{OLD JUNK}
+As a final note, the map sensitivity can be trivially extended to include
+non-uniform experiments. Simply let the integration time per solid angle
+depend on direction, $t = t(\ve{n})$, then
 
-% First we project the noise in a single detector out to the sky. Each pixel
-% looks at a solid angle the size of the beamspot, $\Omega_b$. We must be
-% careful to keep in mind that we are dealing with noise, which adds in
-% quadrature with independent regions, and not pure signal, which adds linearly.
-% If the entire beamspot had a temperature noise of $\unit[1]{\mu K}$, then we
-% would measure a noise on the detector of $\unit[1]{\mu K}$. If we arbitrarily subdivided
-% the beamspot into $M$ different equal-area subregions indexed by $i$, each with
-% independent noise $N_i$ (units of K), then if each subregion has the same noise,
-% then we should end up with the same detector noise (since we're merely counting
-% in a different way). We note that each
+\begin{equation}
+    m^2(\ve{n}) = \frac{\NEQ^2_P}{t(\ve{n})} = \frac{1}{t(\ve{n})}\left( \frac{2}{f_Q} \frac{\unit{s}}{\unit{Hz^{-1}}} \right) \frac{1}{\eta^2 \tau^2}\frac{\NEP^2}{\left( \D{P}{T} \right)^2}.
+\end{equation}
 
-% \begin{equation}
-%     \sqrt{\sum_i \frac{1}{M}\left( \unit[1]{\mu K} \right)^2} = \sqrt{\frac{M}{M} \left(\unit[1]{\mu K} \right)^2} = \unit[1]{\mu K}
-% \end{equation}
+This expression contains the full directional dependence for our purposes,
+because the NEQ depends solely on the properties telescope and detector. For a
+space-based telescope, this is valid. For a balloon- or ground-based
+experiment, it would be wise to include the effects of the atmosphere. Since
+the atmosphere is most conveniently represented in the coordinate system of
+the experiment and not in the CMB coordinate system, it is preferable to
+include atmospheric effects in the integration time and to construct an
+effective integration time, $t(\ve{n}) \to \tilde{t}(\ve{n})$. Using the
+effective integration time $\tilde{t}$, the above equation would then encode
+all of the directional dependencies.
 
+\section{Multiple Detectors}
+\label{sec:multiple_detectors}
 
-% If the entire
-% beamspot had a changed temperature by $\unit[1]{\mu K}$, then the power incident on
-% the detector would change temperature by $\unit[1]{\mu K}$.
+Suppose instead of a single detector we had an array of detectors.
 
-% First we project the noise in a single detector out to the sky. Each pixel
-% looks at a solid angle the size of the beamspot, $\Omega_b$. If the entire
-% beamspot changed temperature by $\unit[1]{\mu K}$, then the power incident on
-% the detector would change temperature by $\unit[1]{\mu K}$. If a subregion
-% inside the beamspot with 1/10th the solid angle changed temperature (with the
-% rest of the beamspot held at fixed temperature), then the subregion would have
-% to change in temperature by $\unit[10]{\mu K}$ to induce a $\unit[1]{\mu K}$
-% change in the power on the detector. Thus, the projection operation changes
-% our units from K to K/sr, and the appropriate scaling factor is $\Omega_b$. We
-% note that this projection is independent of the pixelization scheme, and so
-% the quantity constructed is valid for any pixelation scheme (e.g. HealPIX),
-% and any number of pixels within a scheme (i.e. arbitrary $N_\mathrm{side}$).
-% This quantity is called the sensitivity, or alternatively the sensitivty per
-% beamspot, or other combinations of ``beam'' and ``sensitivity'', and we shall
-% denote it here by $F$,
+\section{Pixel Noise}
+\label{sec:pixel_noise}
 
-% \begin{equation}
-%     F = \frac{\NEQ}{\Omega_b} \qquad \text{with units} \qquad \left[ F \right] = \frac{\unit{K \sqrt{s}}}{\unit{sr}}
-% \end{equation}
+Let us use our map sensitivity to estimate the noise in each pixel of the sky,
+which depends on our pixelization scheme. Equal-area pixelization schemes are
+the most tractable, including HealPIX. Each pixel has a fixed angular size,
+$\Omega_p$. The map sensitivity tells us how much noise is in a region of
+some angular size, so we simply divide the map sensitivity by the pixel size
+to get the pixel noise $N_p$,
 
-% Next we accumulate the integration time. Suppose our instrument uniformly
-% measures a solid angle $\Omega_T$ in a period of time $T$. The solid angle
-% $\Omega_T$ covers $N_b = \Omega_T/\Omega_b$ non-overlapping (i.e. independent)
-% beamspots. Thus, we may distribute the integration time period $T$ into $N_b$
-% independent regions, for an integration time per beamspot $T_b$ of
+\begin{equation}
+    N_p = \frac{m}{\sqrt{\Omega_p}} = \frac{1}{\sqrt{\Omega_p t}} \left( \sqrt{\frac{2}{f_Q}} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{1}{\eta \tau} \frac{\NEP}{\left( \D{P}{T} \right)} \qquad\qquad \left[ \unit{\KCMB \sqrt{pixel}} \right]
+\end{equation}
 
-% \begin{equation*}
-%     T_b = \frac{T}{N_b} = \left( \frac{\Omega_b}{\Omega_T} \right) T
-% \end{equation*}
+where we have included the unitless ``pixel'' to indicate the scaling of the
+pixel noise with the number of pixels. Note that the units justify this, since
+the units of $\Omega_p$ may be written $[\Omega_p] = \unit{sr/pixel}$. To get
+the noise in a single pixel, simply divide by 1 pixel. To get the average
+noise level in a region $N_\mathrm{pix}$ pixels large, simply divide by
+$\sqrt{N_\mathrm{pix}}$.
+
+\section{Map Sensitivity in Angular Units}
+\label{sec:map_sensitivity_in_angular_units}
+
+Frequently features are measured in units of radians (or degrees, arcminutes,
+etc.) rather than steradians. Thus, we would like to know what the map
+sensitivity for such features are. We suppose that a feature described by some angular
+size $\theta$ is actually a spherical cap with angular diameter $\theta$. Note
+that the opening angle for a spherical cap with angular diameter $\theta$ is
+$\theta/2$, i.e. suppose the spherical cap is centered on the $z$-axis, then
+the polar angle between the $z$-axis and the edge of the spherical cap is
+$\theta/2$.
+
+The solid angle of this spherical cap is
+
+\begin{align}
+    \Omega(\theta) & = \int \dd\Omega = \int_0^{\theta/2} \sin \theta'\ \dd\theta' \int \dd\phi \notag \\
+    \Omega(\theta) & = 2\pi \left[ 1 - \cos{\left(\nicefrac{\theta}{2}\right)} \right]
+\end{align}
+
+We note that in the small angle limit,
+
+\begin{equation*}
+    \Omega(\theta) \simeq \frac{\pi \theta^2}{4}
+\end{equation*}
+
+as expected, since it reduces to a flat circle in this limit.
+
+To get the NEQ in radians, we simply use this expression for $\Omega_e$ in Eq.~\ref{eq:m},
+
+\begin{align}
+    m & = \sqrt{\frac{2\pi \left[ 1 - \cos{\left(\nicefrac{\theta}{2}\right)} \right]}{f_sT_e}} \left( \sqrt{\frac{2}{f_Q}} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{1}{\eta \tau}\frac{\NEP}{\left( \D{P}{T} \right)} & \left[ \unit{\KCMB \cdot rad} \right]\\
+    m & \simeq \frac{\sqrt{\pi} \theta}{2 \sqrt{f_sT_e}} \left( \sqrt{\frac{2}{f_Q}} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{1}{\eta \tau}\frac{\NEP}{\left( \D{P}{T} \right)} & \left[ \unit{\KCMB \cdot rad} \right]
+\end{align}
+
+\section{PIPER-like Experiment}
+\label{sec:piper_like_experiment}
+
+Let us estimate some of these parameters for a \piper-like
+experiment\footnote{The following values are all taken from the 2013 \piper\
+proposal.}. A single pixel of \piper's detectors has an NEP of
+
+\begin{equation*}
+    \NEP = \unit[4 \times 10^{-18}]{\frac{W}{\sqrt{Hz}}}
+\end{equation*}
+
+and efficiencies $\eta$ and $\tau$,
+
+\begin{align*}
+    \eta & =
+\end{align*}
 
 \appendix
 \newpage

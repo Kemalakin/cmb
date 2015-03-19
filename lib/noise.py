@@ -19,10 +19,11 @@ __releasestatus__ = 'beta'
 
 import numpy as np
 from scipy.integrate import quad
+import scipy.constants
 
 
 def dPdT(nu_min, nu_max, T=2.7260, eta_optical=0.42, eta_detector=0.5,
-         A=0.058, Omega=1.02e-5, verbose=True):
+         A=0.058, Omega=0.058*1.02e-5, verbose=True):
     """
     Compute dP/dT for the specified frequency band. See docs/noise notes for
     detailed description.
@@ -44,9 +45,9 @@ def dPdT(nu_min, nu_max, T=2.7260, eta_optical=0.42, eta_detector=0.5,
 
     The `verbose` flag prints out the values as they are computed.
     """
-    h = 6.62606957e-34   # J*s
-    kb = 1.3806488e-23   # J/K
-    c = 3.e8             # m/s
+    h = scipy.constants.h  # 6.62606957e-34 J*s
+    kb = scipy.constants.k  # 1.3806488e-23 J/K
+    c = scipy.constants.c  # 299792458.0 m/s
 
     eta = eta_optical*eta_detector
 
@@ -57,7 +58,7 @@ def dPdT(nu_min, nu_max, T=2.7260, eta_optical=0.42, eta_detector=0.5,
 
     AOmega_s = A*Omega  # m^2*sr, single detector
 
-    a1 = 2*h/c
+    a1 = 2*kb/(c*c)
     a2 = kb*T/h
 
     xmin = nu_min/a2
@@ -69,14 +70,13 @@ def dPdT(nu_min, nu_max, T=2.7260, eta_optical=0.42, eta_detector=0.5,
     #
     # P_T0 = coeff*Pintegral        # W
 
-    coeff2 = AOmega_s*(2*kb/(c**2))*(kb*T/h)**3
+    coeff = AOmega_s*eta*a1*a2**3
     dPdTintegrand = lambda x: x**4*np.exp(x)/(np.exp(x) - 1)**2
     dPdTintegral = quad(dPdTintegrand, xmin, xmax)[0]
 
-    dPdT_T0 = coeff2*dPdTintegral   # W/K
+    dPdT_T0 = coeff*dPdTintegral   # W/K
 
     if verbose:
-        print "P @ T_0 = {0} pW".format(P_T0*1.e12)
         print "dP/dT @ T_0 = {0} (10^-18 W)/uK".format(dPdT_T0*1.e-6*1.e18)
 
     return dPdT_T0
