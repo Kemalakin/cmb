@@ -130,18 +130,18 @@ bolometer is
 
 \begin{equation}
     \label{eq:noisepower}
-    \frac{P_N^2}{B} = 2 \int\dd\nu h^2\nu^2 2N(n + n^2) = 2 \int\dd\nu P_\nu h\nu + \int\dd\nu P_\nu^2 \frac{c^2}{A\Omega \nu^2}
+    \frac{P_N^2}{B} = 2 \int\dd\nu h^2\nu^2 2N(n + n^2) = 2 \int\dd\nu P_\nu h\nu + \int\dd\nu P_\nu^2 \frac{c^2}{A\Omega \nu^2} \qquad\qquad \left[ \frac{\unit{W^2}}{\unit{Hz}} \right]
 \end{equation}
 
-where the first term on the right hand side corresponds to $n$ and the second
-term corresponds to $n^2$. $B$ is the detector bandwidth, $N$ is the number of
-modes ($N = A\Omega/\lambda^2$, from the Antenna Equation), $n$ is the number
-of photons per mode, the 2 in front of the first integral comes from the
-conversion between integration time and bandwidth (see below and
-Appendix~\ref{sec:bw}), and the 2 inside the integral comes from the 2
-polarization states per photon. The energy per photon is $h\nu$. The term
-$n + n^2$ is the thermal expectation value for the variation in the number of
-photons per mode, $\Avg{(\Delta n)^2} = n + n^2$.
+where the integral is taken over the passband and the first term on the right
+hand side corresponds to $n$ and the second term corresponds to $n^2$. $B$ is
+the detector bandwidth, $N$ is the number of modes ($N = A\Omega/\lambda^2$,
+from the Antenna Equation), $n$ is the number of photons per mode, the 2 in
+front of the first integral comes from the conversion between integration time
+and bandwidth (see below and Appendix~\ref{sec:bw}), and the 2 inside the
+integral comes from the 2 polarization states per photon. The energy per
+photon is $h\nu$. The term $n + n^2$ is the thermal expectation value for the
+variation in the number of photons per mode, $\Avg{(\Delta n)^2} = n + n^2$.
 
 We note that the number of photons per mode is\cite{kittel_thermal_1980}
 
@@ -167,7 +167,7 @@ power,
 
 \begin{equation}
     \label{eq:noisepower2}
-    \frac{P_N^2}{B} = 2 \int\dd\nu P_\nu h\nu
+    \frac{P_N^2}{B} = 2 \int\dd\nu P_\nu h\nu \qquad\qquad \left[ \frac{\unit{W^2}}{\unit{Hz}} \right]
 \end{equation}
 
 where $P_\nu$ is the power spectral density.
@@ -256,6 +256,24 @@ understand the properties of the photons and how they transport power in order
 to understand how the detector NEP translates to noise at other points. That
 is the purpose of this section.
 
+However, in addition to intrinsic detector noise, there is also intrinsic
+noise in the signal from the sky in what is called photon noise. Photon noise
+can be modeled by using $P_\nu = A\Omega \eta \tau B_\nu(T)$,
+
+\begin{align}
+    \NEP^2_\mathrm{photon} & = \left( \frac{2}{\unit[1]{Hz}} \right) A\Omega\,\eta\tau \left( \frac{2h^2}{c^2} \right) \int_{\Delta\nu}\ \dd\nu\ \frac{\nu^4}{\exp{\left( \frac{h\nu}{\kB T} \right)} - 1} & \left[ \frac{\unit{W^2}}{\unit{Hz}} \right] \\
+    \NEP^2_\mathrm{photon} & = \left( \frac{2}{\unit[1]{Hz}} \right) A\Omega\,\eta\tau \frac{2h^2}{c^2} \left( \frac{\kB T}{h} \right)^5 \int_{x_1}^{x_2}\ \dd x\ \frac{x^4}{e^x - 1} & \left[ \frac{\unit{W^2}}{\unit{Hz}} \right]
+\end{align}
+
+where $x = \frac{h\nu}{\kB T}$. See below for details of the transformation.
+
+Since it originates from the sky, it must be treated slightly differently. For
+a single detector, there is no difference, but for many detectors, the optical
+system can correlate pixels. This is impossible for noise intrinsic to the
+detector, since each detector pixel is a unique independent device. Readout
+noise could correlate different pixels to each other, but we do not consider
+this case here.
+
 \section{NET, NEQ, NEU, NEV}
 \label{sec:net_neq_neu_nev}
 
@@ -277,7 +295,7 @@ temperature-dependent.
 The NET is defined relative to the NEP by
 
 \begin{equation}
-    \NET = \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \text{ in } \unit{\KCMB/\sqrt{Hz}}
+    \NET = \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \left[ \unit{\KCMB/\sqrt{Hz}} \right]
 \end{equation}
 
 where $\D{P}{T}$ is the change in optical power incident on the detector due
@@ -285,7 +303,7 @@ to a change in sky temperature. This is straight-forward to compute if we
 first find the power incident on the detector, which is
 
 \begin{equation}
-    P(T) = \int_{\Delta\nu} \dd\nu\ \eta(\nu) \tau(\nu) P_\nu(T) = A\Omega \int_{\Delta\nu} \dd\nu\ \eta(\nu) \tau(\nu) B_\nu(T)
+    P(T) = \int_{\Delta\nu} \dd\nu\ \eta(\nu) \tau(\nu) P_\nu(T) = A\Omega \int_{\Delta\nu} \dd\nu\ \eta(\nu) \tau(\nu) B_\nu(T) \qquad\qquad \left[ \unit{W} \right]
 \end{equation}
 
 where we have implicitly defined $P_\nu = \eta \tau A\Omega B_\nu(T)$ as the
@@ -311,14 +329,14 @@ The derivative of the Planck distribution can be shown to be
 so
 
 \begin{equation}
-    \D{P}{T} = A\Omega \int_{\Delta\nu} \dd\nu\ \eta(\nu) \frac{2h^2}{c^2\kB T^2} \frac{\nu^4 \exp\left( \frac{h\nu}{\kB T} \right)}{\left[ \exp\left( \frac{h\nu}{\kB T} \right) - 1 \right]^2}
+    \D{P}{T} = A\Omega \int_{\Delta\nu} \dd\nu\ \eta(\nu) \frac{2h^2}{c^2\kB T^2} \frac{\nu^4 \exp\left( \frac{h\nu}{\kB T} \right)}{\left[ \exp\left( \frac{h\nu}{\kB T} \right) - 1 \right]^2} \qquad\qquad \left[ \frac{\unit{W}}{\unit{\KCMB}} \right]
 \end{equation}
 
 which may be put in the more numerically convenient form by using the
 substitution $x = \frac{h}{\kB T} \nu$,
 
 \begin{equation}
-    \D{P}{T} = A\Omega \frac{2\kB}{c^2} \left( \frac{\kB T}{h} \right)^3 \int_{x_1}^{x_2} \dd x\ \eta(x)\tau(x) \frac{x^4 e^x}{\left( e^x - 1 \right)^2}
+    \D{P}{T} = A\Omega \frac{2\kB}{c^2} \left( \frac{\kB T}{h} \right)^3 \int_{x_1}^{x_2} \dd x\ \eta(x)\tau(x) \frac{x^4 e^x}{\left( e^x - 1 \right)^2} \qquad\qquad \left[ \frac{\unit{W}}{\unit{\KCMB}} \right]
 \end{equation}
 
 The integral does not have a nice algebraic solution even if $\eta(x)\tau(x)$ is
@@ -355,7 +373,7 @@ for 2 seconds to get 1 Hz of bandwidth (see Appendix~\ref{sec:bw}). So the corre
 Then the NET may be written in conventional units as
 
 \begin{equation}
-    \NET = \left( \sqrt{2} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \text{ in } \unit{\KCMB \sqrt{s}}
+    \NET = \left( \sqrt{2} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \left[ \unit{\KCMB \sqrt{s}} \right]
 \end{equation}
 
 Next let us examine the noise-equivalent Q-parameter (NEQ). Again this is
@@ -387,25 +405,30 @@ $1/\sqrt{N_\mathrm{obs}}$. Thus, the generic conversions from NET to NEQ, NEU,
 and NEV are
 
 \begin{align*}
-    \NEQ & = \left( \sqrt{\frac{2}{f_Q}} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \text{ in } \unit{\KCMB \sqrt{s}} \\
-    \NEU & = \left( \sqrt{\frac{2}{f_U}} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \text{ in } \unit{\KCMB \sqrt{s}} \\
-    \NEV & = \left( \sqrt{\frac{2}{f_V}} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \text{ in } \unit{\KCMB \sqrt{s}}
+    \NEQ & = \left( \sqrt{\frac{2}{f_Q}} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \left[ \unit{\KCMB \sqrt{s}} \right] \\
+    \NEU & = \left( \sqrt{\frac{2}{f_U}} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \left[ \unit{\KCMB \sqrt{s}} \right] \\
+    \NEV & = \left( \sqrt{\frac{2}{f_V}} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \left[ \unit{\KCMB \sqrt{s}} \right]
 \end{align*}
 
 For \piper, the VPM modulation strategy results in a demodulation such that
-$\sqrt{f_Q} = \sqrt{f_U} = \frac{4}{3}\sqrt{f_V}$.\footnote{See \piper\
-proposal, if available to you...} Combining this with the normalization
-condition, $f_Q + f_U + f_V = 1$, we see that
+$\sqrt{f_Q} = \sqrt{f_U} = \frac{1}{2} \cdot
+\frac{4}{3}\sqrt{f_V}$.\footnote{See \piper\ proposal, if available to you.
+Particularly, each telescope has 0.8 sensitivity to local Q and 0.6
+sensitivity to V. Since sensitivity goes like $\sqrt{f}$, this gives us
+$\sqrt{f_Q} = \frac{0.8}{0.6}\sqrt{f_V} = \frac{4}{3}\sqrt{f_V}$. But since
+both telescopes measure V, and instrument Q and U are measured by only one
+telescope each, the $V$ weight is doubled.} Combining this with the
+normalization condition, $f_Q + f_U + f_V = 1$, we see that
 
 \begin{equation}
-    f_Q = f_U = \frac{16}{41} \simeq 0.3902 \qquad\text{and}\qquad f_V = \frac{9}{41} \simeq 0.2195.
+    f_Q = f_U = \frac{4}{17} \simeq 0.2353 \qquad\text{and}\qquad f_V = \frac{9}{17} \simeq 0.5294.
 \end{equation}
 
 which gives us the \piper-specific conversions,
 
 \begin{align}
-    \NEQ = \NEU & = \left( \frac{\sqrt{82}}{4} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} = \left( \frac{2.264 \unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \text{ in } \unit{\KCMB \sqrt{s}} \\
-    \NEV & = \left( \frac{\sqrt{82}}{3} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} = \left( \frac{3.018 \unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \text{ in } \unit{\KCMB \sqrt{s}}
+    \NEQ = \NEU & = \left( \frac{\sqrt{34}}{2} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} = \left( \frac{2.915 \unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \left[ \unit{\KCMB \sqrt{s}} \right] \\
+    \NEV & = \left( \frac{\sqrt{34}}{3} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} = \left( \frac{1.943 \unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{\NEP}{\left( \D{P}{T} \right)} \qquad \qquad \left[ \unit{\KCMB \sqrt{s}} \right]
 \end{align}
 
 Lastly, note that we have not specified the reference point for the NEP in any
@@ -503,7 +526,103 @@ all of the directional dependencies.
 \section{Multiple Detectors}
 \label{sec:multiple_detectors}
 
-Suppose instead of a single detector we had an array of detectors.
+Suppose instead of a single detector we have an array of detectors. We would
+like to understand how to estimate the sensitivity of the full array from the
+properties of the single pixel and the experiment properties. We recall that
+the map sensitivity is computed from the NEQ via the integration time per
+solid angle,
+
+\begin{equation*}
+    m^2 = \frac{\NEQ_P^2}{t}\qquad\qquad\qquad t = \frac{f_e T_e}{\Omega_e}
+\end{equation*}
+
+Having many detectors factors into the $t$, though they can factor into any of
+$T_e$ or $\Omega_e$. In all cases, changing from 1 detector to $N$
+detectors changes the integration time from $T_e \xrightarrow{N} NT_e$, since
+each of the $N$ detectors is integrating. Additionally, $N$ detectors can map
+out the sky $N$ times as quickly, so as long as the regions never overlap,
+$\Omega_e \xrightarrow{N} N\Omega_e$. In this case, the integration time per
+steradian scales like
+
+\begin{align*}
+    t & \xrightarrow{N} \frac{f_e N T_e}{N \Omega_e} = \frac{f_e T_e}{\Omega_e} \\
+    t & \xrightarrow{N} t \qquad \text{for detectors tiled normal to the travel direction}
+\end{align*}
+
+and the experiment map sensitivity is not improved, but the experiment covers
+a larger area in the same period of time. This scenario is relevant for
+detectors that are tiled in a direction normal to the direction of travel
+along the sky.
+
+For the scenario where the $N - 1$ additional detectors are integrating a
+region that the experiment has already covered, then the behavior is
+different. This scenario is relevant for detectors that are tiled in a
+direction parallel to the direction of travel along the sky. In this case, the
+additional detectors are not measuring new solid angles, so the experimental
+area does not scale with number of detectors, $\Omega_e \xrightarrow{N}
+\Omega_e$. However, the integration time always scales up, $T_e
+\xrightarrow{N} N T_e$. Thus, in this case, the integration time per steradian
+scales like
+
+\begin{align*}
+    t & \xrightarrow{N} \frac{f_e N T_e}{\Omega_e} = N \frac{f_e T_e}{\Omega_e} \\
+    t & \xrightarrow{N} N t \qquad \text{for detectors tiled parallel to the travel direction}
+\end{align*}
+
+Note that the scaling, and thus the integration time per solid angle, depends
+on the scan strategy.
+
+Next we consider the case where the beams of some adjacent detectors overlap
+on the sky. The effects of this depends on where the noise originates from.
+When the beams do not overlap, there is no need to distinguish the source of
+noise, and noise from any origin may be treated similarly. We will first
+consider noise that originates from the detector (e.g. phonon noise).
+Following that we will consider noise that originates from the sky (e.g.
+photon noise).
+
+\textbf{Intrinsic Detector Noise}
+
+For noise the originates in the detector, the noise is independent of the
+signal. The noise in each pixel is independent from every other pixel. So in
+this case, if there is overlap in the beams, then the same signal is measured
+in more than one pixel. Since we are ignoring photon noise (natural variations
+in the signal), the signal is always equal to its mean value. In this case,
+the overlaps are essentially multiple measurements of the same signal, each
+measurement with uncorrelated noise. Thus, this scenario is no different from
+the overlapping region being visited twice at two different time periods, a
+scenario that was discussed above. In this case, the integration time scales
+with the number of detectors, regardless of the beam overlap.
+
+\begin{equation*}
+    t \xrightarrow{N} N t
+\end{equation*}
+
+\textbf{Sky Noise}
+
+For noise that originates in the sky, the noise and signal are correlated. We
+again model the signal as the mean, and now the noise is the variance. For
+regions of the sky that are not overlapping, each instance of noise is a
+realization of the 0-mean Gaussian with variance equal to the sky variance.
+For regions that are overlapping, both detector pixels will sample the same
+region and thus the noise realization will be identical. Thus we have only 1
+sample of the noise in the overlap region and we cannot integrate down the
+noise, even though we have multiple measurements, because the measurements are
+correlated. For the regions without overlap, everything works as described in
+the above general case. So we have
+
+\begin{align*}
+    t & \xrightarrow{N} t \quad \text{for overlapping regions} \\
+    t & \xrightarrow{N} N t \quad \text{for non-overlapping regions}.
+\end{align*}
+
+A convenient way of approximating this is by replacing the actual number of
+pixels with an effective number of pixels. We simply take the width of the
+beam of the full array and divide by the beam width of a single pixel to get
+the effective number of independent pixels along that direction
+$N_\mathrm{eff}$. We note that this is only necessary for detectors tiled
+parallel to the direction of the scan, since for perpendicularly tiled
+detectors the integration time per solid angle does not scale with number of
+detectors, so the transformation $N \to N_\mathrm{eff}$ makes no difference.
 
 \section{Pixel Noise}
 \label{sec:pixel_noise}
@@ -564,8 +683,8 @@ To get the NEQ in radians, we simply use this expression for $\Omega_e$ in Eq.~\
 \label{sec:piper_like_experiment}
 
 Let us estimate some of these parameters for a \piper-like
-experiment\footnote{The following values are all taken from the 2013 \piper\
-proposal.}. A single pixel of \piper's detectors has an NEP of
+experiment\footnote{The following values are all taken from the 2014 \piper\
+proposal.}. A single pixel of \piper's detectors has a phonon NEP of
 
 \begin{equation*}
     \NEP = \unit[4 \times 10^{-18}]{\frac{W}{\sqrt{Hz}}}
@@ -573,9 +692,39 @@ proposal.}. A single pixel of \piper's detectors has an NEP of
 
 and efficiencies $\eta$ and $\tau$,
 
-\begin{align*}
-    \eta & =
-\end{align*}
+\begin{minipage}{\textwidth}
+\begin{center}
+\begin{tabular}{c|cccc}
+    Frequency & 200 GHz & 270 GHz & 350 GHz & 600 GHz\\
+    Bandwidth $\delta\nu/\nu$ & 0.3 & 0.3 & 0.16 & 0.1 \\ \hline
+    $\eta$ & 0.9 & 0.9 & 0.7 & 0.5 \\
+    $\tau$ & 0.55 & 0.52 & 0.5 & 0.42 \\ \hline
+    Single-pixel Area $\left[\unit{m^2}\right]$ & $1.3 \times 10^{-6}$\footnote{$\unit[1135]{\mu m} \times \unit[1135]{\mu m}$} & $1.3 \times 10^{-6}$ & $1.3 \times 10^{-6}$ & $1.3 \times 10^{-6}$ \\
+    $f/\mathrm{N}$\footnote{At the detector.} & 1.6 & 1.6 & 1.6 & 1.6 \\
+    $\Omega$\footnote{At the detector.} $\left[ \unit{sr} \right]$ & 0.2424 & 0.2424 & 0.2424 & 0.2424 \\
+    $A\Omega$ $\left[ \unit{m^2\ sr} \right]$ & $3.1\times 10^{-7}$ & $3.1\times 10^{-7}$ & $3.1\times 10^{-7}$ & $3.1\times 10^{-7}$ \\ \hline
+    NEP\footnote{At the detector.} (phonon) $\left[ \unit{\frac{W}{\sqrt{Hz}}} \right]$ & $4 \times 10^{-18}$ & $4 \times 10^{-18}$ & $4 \times 10^{-18}$ & $4 \times 10^{-18}$
+\end{tabular}
+\end{center}
+\end{minipage}
+
+A single pixel has area
+
+\begin{equation*}
+    A = \unit[1135]{\mu m} \times \unit[1135]{\mu m} = \unit[1.288 \times 10^{-6}]{m^2}
+\end{equation*}
+
+and the $f$/number at the detectors is $f/1.6$, which corresponds to
+
+\begin{equation*}
+    \Omega = \frac{4\pi}{(4 f/\mathrm{N})^2} = \unit[0.2424]{sr}
+\end{equation*}
+
+for a throughput of
+
+\begin{equation*}
+    A\Omega = \unit[3.122 \times 10^{-7}]{m^2\ sr}
+\end{equation*}
 
 \appendix
 \newpage
@@ -587,7 +736,7 @@ Suppose we integrate a signal $x(t)$ for a period of time $T$. This is
 equivalent to filtering the signal with a rect filter,
 
 \begin{equation}
-    h(t) = \rect(t/T) = u(t - \nicefrac{T}{2}) - u(t + \nicefrac{T}{2}),
+    h(t) = \rect(t/T) = u(t + \nicefrac{T}{2}) - u(t - \nicefrac{T}{2}),
 \end{equation}
 
 where $u(t)$ is the Heaviside step function. In harmonic space, this filter is
