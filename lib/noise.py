@@ -63,6 +63,8 @@ def dPdT(nu_min, nu_max, T=2.7260, eta_optical=0.42, eta_detector=0.5,
 
     xmin = nu_min/a2
     xmax = nu_max/a2
+    if verbose:
+        print "x_min, x_max, dx = ", xmin, xmax, xmax-xmin
 
     # coeff = AOmega_s*a1*(a2**4)*eta
     # Pintegrand = lambda x: x**3/(np.exp(x) - 1)

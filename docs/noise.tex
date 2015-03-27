@@ -339,8 +339,8 @@ substitution $x = \frac{h}{\kB T} \nu$,
     \D{P}{T} = A\Omega \frac{2\kB}{c^2} \left( \frac{\kB T}{h} \right)^3 \int_{x_1}^{x_2} \dd x\ \eta(x)\tau(x) \frac{x^4 e^x}{\left( e^x - 1 \right)^2} \qquad\qquad \left[ \frac{\unit{W}}{\unit{\KCMB}} \right]
 \end{equation}
 
-The integral does not have a nice algebraic solution even if $\eta(x)\tau(x)$ is
-constant, but is amenable to quadrature for realistic bandpass functions
+The integral does not have a nice algebraic solution even if $\eta(x)\tau(x)$
+is constant, but is amenable to quadrature for realistic bandpass functions
 $\eta(x)$. We note, as discussed above, that the etendue ($A\Omega$), the
 band-pass, the efficiency, and the sky temperature are involved in this
 conversion factor.
@@ -352,19 +352,20 @@ and
     \left[ \NET \right] = \left[ \frac{\NEP}{\left( \D{P}{T} \right)} \right] = \unit{\frac{W}{\sqrt{Hz}}} \unit{\frac{K}{W}} = \unit{\frac{K}{\sqrt{Hz}}}
 \end{equation*}
 
-However the conventional unit for NET is $\unit{\KCMB \sqrt{s}}$, for which the
-procedure to get the noise figure in K is to divide by the square root of the
-integration time, i.e. more integration time results in less noise. This is
-conceptually intuitive, since one would expect that the measurement from each
-period of time would be independent, so the number of independent samples
+However the conventional unit for NET is $\unit{\KCMB \sqrt{s}}$, for which
+the procedure to get the noise figure in K is to divide by the square root of
+the integration time, i.e. more integration time results in less noise. This
+is conceptually intuitive, since one would expect that the measurement from
+each period of time would be independent, so the number of independent samples
 would go like $f_\mathrm{sample} \cdot T_\mathrm{integration}$, and the noise
 would go down by the square root of the number of independent samples.
 
 We note that formally the units $\unit{\frac{\KCMB}{\sqrt{Hz}}}$ and
-$\unit{\KCMB \sqrt{s}}$ are equivalent. However, the conversion between the two is
-a bit more subtle. We wish to convert between units of bandwidth to units of
-integration time, but due to the Nyquist sampling theorem, we must integrate
-for 2 seconds to get 1 Hz of bandwidth (see Appendix~\ref{sec:bw}). So the correct conversion factor is
+$\unit{\KCMB \sqrt{s}}$ are equivalent. However, the conversion between the
+two is a bit more subtle. We wish to convert between units of bandwidth to
+units of integration time, but due to the Nyquist sampling theorem, we must
+integrate for 2 seconds to get 1 Hz of bandwidth (see Appendix~\ref{sec:bw}).
+So the correct conversion factor is
 
 \begin{equation*}
     1 = \frac{\unit[2]{s}}{\unit[1]{Hz^{-1}}}
@@ -476,14 +477,14 @@ To get a sense of the meaning of $f_s$, we can imagine two different
 experiments with the same etendue $A\Omega$. The first experiment has a small
 beam $\Omega_1$, and so in the experiment period $T_e$ can only cover the
 experimental region $\Omega_e$ by raster scanning. Each beam spot gets an
-integration time of only $T_e/(\Omega_e/\Omega_1)$. The second experiment has a
-large beam $\Omega_2 > \Omega_1$, and so can cover the experimental region
-more quickly, and so cover it more times in the given experimental period.
-In particular, experiment 2 has an integration time of
-$T_e/(\Omega_e/\Omega_2)$. If experiment 2 followed a similar raster scan
-strategy, it would complete
-$f_s = \frac{T_e/(\Omega_e/\Omega_2)}{T_e/(\Omega_e/\Omega_1)} = \Omega_2/\Omega_1$
-scans in the time experiment 2 took to complete a single scan.
+integration time of only $T_e/(\Omega_e/\Omega_1)$. The second experiment has
+a large beam $\Omega_2 > \Omega_1$, and so can cover the experimental region
+more quickly, and so cover it more times in the given experimental period. In
+particular, experiment 2 has an integration time of $T_e/(\Omega_e/\Omega_2)$.
+If experiment 2 followed a similar raster scan strategy, it would complete
+$f_s = \frac{T_e/(\Omega_e/\Omega_2)}{T_e/(\Omega_e/\Omega_1)} =
+\Omega_2/\Omega_1$ scans in the time experiment 2 took to complete a single
+scan.
 
 Then as we noted before, the integration period and the number of independent
 samples are related, so we should divide $\NEQ_P$ by $\sqrt{t}$ to get the
@@ -494,8 +495,8 @@ map sensitivity $m$,
     m & = \frac{1}{\sqrt{t}} \left( \sqrt{\frac{2}{f_Q}} \frac{\unit{\sqrt{s}}}{\unit{Hz^{-1/2}}} \right) \frac{1}{\eta \tau} \frac{\NEP}{\left( \D{P}{T} \right)} \qquad\qquad \left[ \unit{\KCMB \sqrt{sr}} \right]
 \end{align}
 
-We note that $m$ has units of $[m] = \unit{\KCMB \sqrt{sr}}$. It represents the
-amount of noise one would get in a region that subtends a particular solid
+We note that $m$ has units of $[m] = \unit{\KCMB \sqrt{sr}}$. It represents
+the amount of noise one would get in a region that subtends a particular solid
 angle. Larger regions require more integration time, and so their noise is
 reduced. Put another way, 1 second of integration time can measure a region of
 a particular size (in solid angle) to some fixed amount of precision. To
@@ -650,12 +651,12 @@ $\sqrt{N_\mathrm{pix}}$.
 
 Frequently features are measured in units of radians (or degrees, arcminutes,
 etc.) rather than steradians. Thus, we would like to know what the map
-sensitivity for such features are. We suppose that a feature described by some angular
-size $\theta$ is actually a spherical cap with angular diameter $\theta$. Note
-that the opening angle for a spherical cap with angular diameter $\theta$ is
-$\theta/2$, i.e. suppose the spherical cap is centered on the $z$-axis, then
-the polar angle between the $z$-axis and the edge of the spherical cap is
-$\theta/2$.
+sensitivity for such features are. We suppose that a feature described by some
+angular size $\theta$ is actually a spherical cap with angular diameter
+$\theta$. Note that the opening angle for a spherical cap with angular
+diameter $\theta$ is $\theta/2$, i.e. suppose the spherical cap is centered on
+the $z$-axis, then the polar angle between the $z$-axis and the edge of the
+spherical cap is $\theta/2$.
 
 The solid angle of this spherical cap is
 
@@ -683,48 +684,115 @@ To get the NEQ in radians, we simply use this expression for $\Omega_e$ in Eq.~\
 \label{sec:piper_like_experiment}
 
 Let us estimate some of these parameters for a \piper-like
-experiment\footnote{The following values are all taken from the 2014 \piper\
-proposal.}. A single pixel of \piper's detectors has a phonon NEP of
-
-\begin{equation*}
-    \NEP = \unit[4 \times 10^{-18}]{\frac{W}{\sqrt{Hz}}}
-\end{equation*}
-
-and efficiencies $\eta$ and $\tau$,
+experiment. The parameters for the \piper\ experiment are listed in the table
+below. All values are taken from the 2014 \piper\ proposal.
 
 \begin{minipage}{\textwidth}
 \begin{center}
-\begin{tabular}{c|cccc}
+\begin{tabular}{|c|cccc|}\hline
     Frequency & 200 GHz & 270 GHz & 350 GHz & 600 GHz\\
     Bandwidth $\delta\nu/\nu$ & 0.3 & 0.3 & 0.16 & 0.1 \\ \hline
     $\eta$ & 0.9 & 0.9 & 0.7 & 0.5 \\
     $\tau$ & 0.55 & 0.52 & 0.5 & 0.42 \\ \hline
     Single-pixel Area $\left[\unit{m^2}\right]$ & $1.3 \times 10^{-6}$\footnote{$\unit[1135]{\mu m} \times \unit[1135]{\mu m}$} & $1.3 \times 10^{-6}$ & $1.3 \times 10^{-6}$ & $1.3 \times 10^{-6}$ \\
-    $f/\mathrm{N}$\footnote{At the detector.} & 1.6 & 1.6 & 1.6 & 1.6 \\
-    $\Omega$\footnote{At the detector.} $\left[ \unit{sr} \right]$ & 0.2424 & 0.2424 & 0.2424 & 0.2424 \\
+    $f/\mathrm{N}$\footnote{Single pixel. At the detector.} & 1.6 & 1.6 & 1.6 & 1.6 \\
+    $\Omega$\footnote{Single pixel. At the detector.} $\left[ \unit{sr} \right]$ & 0.2424 & 0.2424 & 0.2424 & 0.2424 \\
     $A\Omega$ $\left[ \unit{m^2\ sr} \right]$ & $3.1\times 10^{-7}$ & $3.1\times 10^{-7}$ & $3.1\times 10^{-7}$ & $3.1\times 10^{-7}$ \\ \hline
-    NEP\footnote{At the detector.} (phonon) $\left[ \unit{\frac{W}{\sqrt{Hz}}} \right]$ & $4 \times 10^{-18}$ & $4 \times 10^{-18}$ & $4 \times 10^{-18}$ & $4 \times 10^{-18}$
+    NEP\footnote{Single pixel. At the detector.} (phonon) $\left[ \unit{\frac{W}{\sqrt{Hz}}} \right]$ & $4 \times 10^{-18}$ & $4 \times 10^{-18}$ & $4 \times 10^{-18}$ & $4 \times 10^{-18}$ \\
+    NEP\footnote{Single pixel. At the detector.} (photon) $\left[ \unit{\frac{W}{\sqrt{Hz}}} \right]$ & $7 \times 10^{-18}$ & $8 \times 10^{-18}$ & $11 \times 10^{-18}$ & $13 \times 10^{-18}$ \\ \hline
+    Independent Rows\footnote{Rows on the sky, not electronically addressed.} (of 32) & 14 & 18 & 21 & 27 \\
+    Independent Columns\footnote{Columns on the sky, not electronically addressed.} (of 40) & 17 & 22 & 27 & 34 \\
+    Independent Pixels (of 5120) & 943 & 1550 & 2270 & 3760 \\ \hline
+    $f_Q$ & 4/17 & 4/17 & 4/17 & 4/17 \\
+    $f_U$ & 4/17 & 4/17 & 4/17 & 4/17 \\
+    $f_V$ & 13/17 & 13/17 & 13/17 & 13/17\\
+    \hline
 \end{tabular}
 \end{center}
 \end{minipage}
 
-A single pixel has area
+We must tally up the integration time for one flight of the experiment. The
+detectors are oriented such that the array is aligned with the Earth's
+horizon, with 40 detectors in the azimuthal direction and 32 detectors in the
+polar direction. We will only account for measurements during the night.
+\piper's scan strategy is to simply spin in azimuth at a constant rate and let
+the sky rotation cover the sky. The spin rate is such that there is a 1/3
+overlap from one circle on the sky to the next. With this scan strategy,
+\piper\ will cover about 50\% of the sky in a single overnight flight. \piper\
+has 4 co-pointed arrays of $32 \times 40$ pixels, for a total of 5120
+detectors.
+
+The base integration time per solid angle, not accounting for overlap factors,
+is $t_0 = (\unit[10]{hrs})/(\unit[0.5 \cdot 4\pi]{sr}) = \unit[5700]{s/sr}$.
+We now account for overlap factors.
+
+We first note that since the 4 arrays are co-pointed, they always observe the
+same region. Thus, all 4 arrays has 4 times the integration time of 1 array
+but will cover the same area, resulting in a factor of 4 on the integration
+time per solid angle. The 4 arrays gives us an overlap factor of
+$f_\mathrm{arrays} = 4$.
+
+Next we note that a single column (in the sense of the sky, not the electronic
+addressing) of detectors will cover the same solid angle as the full array,
+since the remaining 39 columns are simply following the first (see
+Section~\ref{sec:multiple_detectors}). So the 40 rows gives us a overlap
+factor $f_\mathrm{rows}^\mathrm{phonon} = 40$. However, this is valid only for
+the phonon noise, since the beams for adjacent pixels on the sky overlap. For
+photon noise, we have only between 14 and 27 independent columns, so the
+overlap factor is only between 14 and 27 for photon noise.
+
+The overlap of 1/3 of one circle to the next as the payload rotates means that
+the sky coverage is such that we are effectively alternating stripes with 1/3
+the array beam height with overlap factors alternating between 1 and 2. So we
+have an effective overlap factor $f_\mathrm{scan} = 3/2$.
+
+The total integration time per solid angle is then computed as
 
 \begin{equation*}
-    A = \unit[1135]{\mu m} \times \unit[1135]{\mu m} = \unit[1.288 \times 10^{-6}]{m^2}
+    t = f_\mathrm{arrays} \cdot f_\mathrm{rows}^X \cdot f_\mathrm{scan} \cdot t_0 \qquad\qquad X \in \left\{ \mathrm{phonon}, \mathrm{photon} \right\}
 \end{equation*}
 
-and the $f$/number at the detectors is $f/1.6$, which corresponds to
+which gives us
 
-\begin{equation*}
-    \Omega = \frac{4\pi}{(4 f/\mathrm{N})^2} = \unit[0.2424]{sr}
-\end{equation*}
+\begin{center}
+\begin{tabular}{|c|cccc|}\hline
+    Frequency & 200 GHz & 270 GHz & 350 GHz & 600 GHz \\ \hline
+    $t_\mathrm{phonon}$ \quad $\left[ \unit[10^6]{s/sr} \right]$ & 1.1 & 1.1 & 1.1 & 1.1 \\
+    $t_\mathrm{photon}$ \quad $\left[ \unit[10^6]{s/sr} \right]$ & 0.47 & 0.61 & 0.73 & 0.94 \\ \hline
+\end{tabular}
+\end{center}
 
-for a throughput of
+We now have all the figures we need for map sensitivity. We repeat a few to
+make a more convenient table.
 
-\begin{equation*}
-    A\Omega = \unit[3.122 \times 10^{-7}]{m^2\ sr}
-\end{equation*}
+\begin{minipage}{\textwidth}
+\begin{center}
+\begin{tabular}{|c|cccc|}\hline
+    Frequency & 200 GHz & 270 GHz & 350 GHz & 600 GHz \\ \hline
+    $\eta$ & 0.9 & 0.9 & 0.7 & 0.5 \\
+    $\tau$ & 0.55 & 0.52 & 0.5 & 0.42 \\ \hline
+    NEP\footnote{Single pixel. At the detector.} (phonon) $\left[ \unit{\frac{W}{\sqrt{Hz}}} \right]$ & $4 \times 10^{-18}$ & $4 \times 10^{-18}$ & $4 \times 10^{-18}$ & $4 \times 10^{-18}$ \\
+    NEP\footnote{Single pixel. At the detector.} (photon) $\left[ \unit{\frac{W}{\sqrt{Hz}}} \right]$ & $7 \times 10^{-18}$ & $8 \times 10^{-18}$ & $11 \times 10^{-18}$ & $13 \times 10^{-18}$ \\ \hline
+    $\D{P}{T}$ \quad $\left[ \frac{\unit{W}}{\unit{\KCMB}} \right]$ & 5.5 & 6.6 & 2.34 & 1.6 \\ \hline
+    $f_Q$ & 4/17 & 4/17 & 4/17 & 4/17 \\
+    $f_U$ & 4/17 & 4/17 & 4/17 & 4/17 \\
+    $f_V$ & 13/17 & 13/17 & 13/17 & 13/17\\ \hline
+    $\NEQ/\mathrm{U}$\footnote{Single detector. On the sky.} (phonon) \quad $\left[ \unit{\mu \KCMB \sqrt{s}} \right]$ & 299 & 259 & 840 & 15761 \\
+    $\NEV$ \quad (phonon) $\left[ \unit{\mu \KCMB \sqrt{s}} \right]$ & 166 & 144 & 466 & 8743 \\
+    $\NEQ/\mathrm{U}$ (photon) \quad $\left[ \unit{\mu \KCMB \sqrt{s}} \right]$ & 523 & 518 & 2311 & 51224 \\
+    $\NEV$ \quad (photon) $\left[ \unit{\mu \KCMB \sqrt{s}} \right]$ & 290 & 287 & 1282 & 28414 \\ \hline
+    $t$ (phonon) \quad $\left[ \unit[10^6]{s/sr} \right]$ & 1.1 & 1.1 & 1.1 & 1.1 \\
+    $t$ (photon) \quad $\left[ \unit[10^6]{s/sr} \right]$ & 0.47 & 0.61 & 0.73 & 0.94 \\ \hline
+    $m_{Q/U}$ (phonon) \quad $\left[ \unit{\mu \KCMB \sqrt{sr}} \right]$ & 0.28 & 0.25 & 0.80 & 15 \\
+    $m_V$ (phonon) \quad $\left[ \unit{\mu \KCMB \sqrt{sr}} \right]$ & 0.16 & 0.14 & 0.44 & 8.3 \\
+    $m_{Q/U}$ (phonon) \quad $\left[ \unit{\mu \KCMB \sqrt{sr}} \right]$ & 0.76 & 0.66 & 2.7 & 53 \\
+    $m_V$ (photon) \quad $\left[ \unit{\mu \KCMB \sqrt{sr}} \right]$ & 0.42 & 0.37 & 1.5 & 29 \\ \hline
+    $m_{Q/U}$ (total) \quad $\left[ \unit{\mu \KCMB \sqrt{sr}} \right]$ & 0.81 & 0.71 & 2.8 & 55 \\
+    $m_V$ (total) \quad $\left[ \unit{\mu \KCMB \sqrt{sr}} \right]$ & 0.45 & 0.39 & 1.6 & 30 \\ \hline
+\end{tabular}
+\end{center}
+\end{minipage}
+
 
 \appendix
 \newpage
@@ -768,10 +836,11 @@ and so the conversion between seconds of integration time and Hz of bandwidth is
     1 = \frac{\unit[1]{s}}{\unit[\frac{1}{2}]{Hz^{-1}}} = \frac{\unit[2]{s}}{\unit[1]{Hz^{-1}}}
 \end{equation}
 
-Note that for linear time-invariant (LTI) systems, whether we do the
-integration in the time domain all at once or over a series of bursts, the
-result must be the same. We could simply time-shift all of the individual
-bursts to be right next to each other, thereby recreating the full-width rect.
+As a final note, the relationship between bandwidth and integration time is
+inversely proportional. As the integration time increases, we integrate a
+smaller bandwidth. This is intuitively correct, since as the bandwidth
+decreases, the noise will decrease, and as the integration time increases, the
+noise will decrease.
 
 \bibliography{noise}
 \bibliographystyle{plain}
