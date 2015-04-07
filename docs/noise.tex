@@ -311,7 +311,7 @@ spectral power density, $\Delta\nu$ is the passband and $B_\nu(T)$ is the
 Planck distribution, which we note already includes both polarization modes,
 
 \begin{equation*}
-    B_\nu(T) = \frac{2h}{c^2} \frac{\nu^3}{\exp{\left( \frac{h\nu}{\kB T} \right)}}.
+    B_\nu(T) = \frac{2h}{c^2} \frac{\nu^3}{\exp{\left( \frac{h\nu}{\kB T} \right)} - 1}.
 \end{equation*}
 
 Then $\D{P}{T}$ is given by
@@ -705,7 +705,7 @@ below. All values are taken from the 2014 \piper\ proposal.
     Independent Pixels (of 5120) & 943 & 1550 & 2270 & 3760 \\ \hline
     $f_Q$ & 4/17 & 4/17 & 4/17 & 4/17 \\
     $f_U$ & 4/17 & 4/17 & 4/17 & 4/17 \\
-    $f_V$ & 13/17 & 13/17 & 13/17 & 13/17\\
+    $f_V$ & 9/17 & 9/17 & 9/17 & 9/17\\
     \hline
 \end{tabular}
 \end{center}
@@ -773,22 +773,22 @@ make a more convenient table.
     $\tau$ & 0.55 & 0.52 & 0.5 & 0.42 \\ \hline
     NEP\footnote{Single pixel. At the detector.} (phonon) $\left[ \unit{\frac{W}{\sqrt{Hz}}} \right]$ & $4 \times 10^{-18}$ & $4 \times 10^{-18}$ & $4 \times 10^{-18}$ & $4 \times 10^{-18}$ \\
     NEP\footnote{Single pixel. At the detector.} (photon) $\left[ \unit{\frac{W}{\sqrt{Hz}}} \right]$ & $7 \times 10^{-18}$ & $8 \times 10^{-18}$ & $11 \times 10^{-18}$ & $13 \times 10^{-18}$ \\ \hline
-    $\D{P}{T}$ \quad $\left[ \frac{\unit{W}}{\unit{\KCMB}} \right]$ & 5.5 & 6.6 & 2.34 & 1.6 \\ \hline
+    $\D{P}{T}$ \quad $\left[ \frac{\unit{W}}{\unit{\KCMB}} \right]$ & $5.5 \times 10^{-14}$ & $6.6 \times 10^{-14}$ & $2.34 \times 10^{-14}$ & $1.6 \times 10^{-15}$ \\ \hline
     $f_Q$ & 4/17 & 4/17 & 4/17 & 4/17 \\
     $f_U$ & 4/17 & 4/17 & 4/17 & 4/17 \\
-    $f_V$ & 13/17 & 13/17 & 13/17 & 13/17\\ \hline
+    $f_V$ & 9/17 & 9/17 & 9/17 & 9/17\\ \hline
     $\NEQ/\mathrm{U}$\footnote{Single detector. On the sky.} (phonon) \quad $\left[ \unit{\mu \KCMB \sqrt{s}} \right]$ & 299 & 259 & 840 & 15761 \\
-    $\NEV$ \quad (phonon) $\left[ \unit{\mu \KCMB \sqrt{s}} \right]$ & 166 & 144 & 466 & 8743 \\
+    $\NEV$ \quad (phonon) $\left[ \unit{\mu \KCMB \sqrt{s}} \right]$ & 199 & 173 & 560 & 10507 \\
     $\NEQ/\mathrm{U}$ (photon) \quad $\left[ \unit{\mu \KCMB \sqrt{s}} \right]$ & 523 & 518 & 2311 & 51224 \\
-    $\NEV$ \quad (photon) $\left[ \unit{\mu \KCMB \sqrt{s}} \right]$ & 290 & 287 & 1282 & 28414 \\ \hline
+    $\NEV$ \quad (photon) $\left[ \unit{\mu \KCMB \sqrt{s}} \right]$ & 348 & 346 & 1541 & 34149 \\ \hline
     $t$ (phonon) \quad $\left[ \unit[10^6]{s/sr} \right]$ & 1.1 & 1.1 & 1.1 & 1.1 \\
     $t$ (photon) \quad $\left[ \unit[10^6]{s/sr} \right]$ & 0.47 & 0.61 & 0.73 & 0.94 \\ \hline
     $m_{Q/U}$ (phonon) \quad $\left[ \unit{\mu \KCMB \sqrt{sr}} \right]$ & 0.28 & 0.25 & 0.80 & 15 \\
-    $m_V$ (phonon) \quad $\left[ \unit{\mu \KCMB \sqrt{sr}} \right]$ & 0.16 & 0.14 & 0.44 & 8.3 \\
+    $m_V$ (phonon) \quad $\left[ \unit{\mu \KCMB \sqrt{sr}} \right]$ & 0.19 & 0.16 & 0.53 & 10 \\
     $m_{Q/U}$ (phonon) \quad $\left[ \unit{\mu \KCMB \sqrt{sr}} \right]$ & 0.76 & 0.66 & 2.7 & 53 \\
-    $m_V$ (photon) \quad $\left[ \unit{\mu \KCMB \sqrt{sr}} \right]$ & 0.42 & 0.37 & 1.5 & 29 \\ \hline
+    $m_V$ (photon) \quad $\left[ \unit{\mu \KCMB \sqrt{sr}} \right]$ & 0.51 & 0.44 & 1.8 & 35 \\ \hline
     $m_{Q/U}$ (total) \quad $\left[ \unit{\mu \KCMB \sqrt{sr}} \right]$ & 0.81 & 0.71 & 2.8 & 55 \\
-    $m_V$ (total) \quad $\left[ \unit{\mu \KCMB \sqrt{sr}} \right]$ & 0.45 & 0.39 & 1.6 & 30 \\ \hline
+    $m_V$ (total) \quad $\left[ \unit{\mu \KCMB \sqrt{sr}} \right]$ & 0.54 & 0.47 & 1.9 & 37 \\ \hline
 \end{tabular}
 \end{center}
 \end{minipage}
