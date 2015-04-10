@@ -163,3 +163,120 @@ else:
     print strtemplate.format('U map from synch angle', fnameU)
     fig.savefig(fnameU)
     fig.clf()
+
+#noise_table
+fname = imgpath + 'noise_table.txt'
+if os.path.isfile(fname) and not force:
+    print strexists.format(fname)
+else:
+    NEPs_photon = np.array([7., 8., 11., 13.])*1.e-18  # W/sqrt(Hz)
+    NEPs_phonon = np.array([4., 4., 4., 4.])*1.e-18  # W/sqrt(Hz)
+    etas = np.array([0.9, 0.9, 0.7, 0.5])  # unitless detector absorption efficiency
+    taus = np.array([.55, .52, .5, .42])  # unitless optical efficiency
+    nu_mids = np.array([200., 270., 350., 600.])*1.e9   # Band center frequency in GHz
+    bws = np.array([.3, .3, .16, .1])  # Band width dnu/nu
+    nu_mins = nu_mids*(1 - bws/2.)  # Lower cut-off of frequency bands
+    nu_maxs = nu_mids*(1 + bws/2.)  # Upper cut-off of frequency bands
+
+    fQ = fU = 4./17
+    fV = 13./17
+
+    fnum = 1.6  # At detector
+    Omega = 4*np.pi/(4*fnum)**2  # At detector
+    A_single = (1135.e-6)**2  # 1135 um x 1135 um pixels
+
+    dPdTs = [lib.noise.dPdT(nu_mins[i], nu_maxs[i], eta_optical=taus[i], eta_detector=etas[i],
+                            A=A_single, Omega=Omega, verbose=False) for i in range(4)]
+
+    NEQ_phonons = NEU_phonons = np.sqrt(2/fQ)*1/np.sqrt(taus*etas)*NEPs_phonon/dPdTs  # K sqrt(s)
+    NEV_phonons = np.sqrt(2/fV)*1/np.sqrt(taus*etas)*NEPs_phonon/dPdTs  # K sqrt(s)
+
+    NEQ_photons = NEU_photons = np.sqrt(2/fQ)*1/np.sqrt(taus*etas)*NEPs_photon/dPdTs  # K sqrt(s)
+    NEV_photons = np.sqrt(2/fV)*1/np.sqrt(taus*etas)*NEPs_photon/dPdTs  # K sqrt(s)
+
+    linestr = "{0:^30} {1:^10} {2:^10} {3:^10} {4:^10}"
+    linebreak = ('-'*30, np.array(['-'*10]*4))
+    fmtstr = lambda x: ('{0:.3e}' if len(str(x)) > 10 else '{0}').format(x)
+
+    elemlist = [('Frequency (GHz)', ['200', '270', '350', '600']),
+                ('Bandwidth (dnu/nu)', bws),
+                linebreak,
+                ('eta', etas),
+                ('tau', taus),
+                linebreak,
+                ('Single Pixel Area (m^2)', A_single + bws*0),
+                ('f-number (f/N)', fnum + bws*0),
+                ('Single Pixel Omega (sr)', Omega + bws*0),
+                ('AOmega (m^2 sr)', A_single*Omega + bws*0),
+                linebreak,
+                ('f_Q/U', fQ + bws*0),
+                ('f_V', fV + bws*0),
+                linebreak,
+                ('NEP (photon) (W/sqrt(Hz))', NEPs_photon),
+                ('NEP (phonon) (W/sqrt(Hz))', NEPs_phonon),
+                linebreak,
+                ('dP/dTs (W/K)', dPdTs),
+                ('NEQ_phonons (uK sqrt(s))', NEQ_phonons*1.e6),
+                ('NEU_phonons (uK sqrt(s))', NEU_phonons*1.e6),
+                ('NEV_phonons (uK sqrt(s))', NEV_phonons*1.e6)]
+
+    t0 = 10.*3600/(0.5*4*np.pi)  # 10 hours/half sky -> s/sr
+    farrays = 4.  # 4 co-pointed arrays
+
+    nind = np.array([943., 1550., 2270., 3760.])
+    fs = np.sqrt(nind/(4.*32*40))  # fraction of non-overlapping beams
+    frows_photon = fs*32.  # number of independent pixels (beamspots) along the column (polar direction)
+    frows_phonon = 32. # number of independent pixels for phonons
+
+    fscan = 1.5  # scan strategy overlap
+
+    t_photon = t0*farrays*frows_photon*fscan  # s/sr
+    t_phonon = t0*farrays*frows_phonon*fscan + t_photon*0  # s/sr
+
+    mQ_photons = mU_photons = 1/np.sqrt(t_photon)*NEQ_photons
+    mV_photons = 1/np.sqrt(t_photon)*NEV_photons
+
+    mQ_phonons = mU_phonons = 1/np.sqrt(t_phonon)*NEQ_phonons
+    mV_phonons = 1/np.sqrt(t_phonon)*NEV_phonons
+
+    mQ_total = np.sqrt(mQ_photons**2 + mQ_phonons**2)
+    mU_total = np.sqrt(mU_photons**2 + mU_phonons**2)
+    mV_total = np.sqrt(mV_photons**2 + mV_phonons**2)
+
+    # theta_beam = 19./60*np.pi/180.  # radians
+    theta_beam = 6.*np.pi/180.  # radians
+    Omega_beam = 2*np.pi*(1 - np.cos(theta_beam/2.))  # sr
+    Omega_pixel = hp.nside2pixarea(512)  # sr
+
+    linestr = "{0:^30} {1:^10} {2:^10} {3:^10} {4:^10}"
+    linebreak = ('-'*30, np.array(['-'*10]*4))
+    fmtstr = lambda x: ('{0:.3e}' if (len(str(x)) > 10) else '{0}').format(x)[:10]
+
+    elemlist2 = [linebreak,
+                 ('t (phonon) (10^6 s/sr)', t_phonon/1.e6),
+                 ('t (photon) (10^6 s/sr)', t_photon/1.e6),
+                 linebreak,
+                 ('mQ (phonons) (uK sqrt(sr))', mQ_phonons*1.e6),
+                 ('mU (phonons) (uK sqrt(sr))', mU_phonons*1.e6),
+                 ('mV (phonons) (uK sqrt(sr))', mV_phonons*1.e6),
+                 ('mQ (photons) (uK sqrt(sr))', mQ_photons*1.e6),
+                 ('mU (photons) (uK sqrt(sr))', mU_photons*1.e6),
+                 ('mV (photons) (uK sqrt(sr))', mV_photons*1.e6),
+                 ('mQ (total) (uK sqrt(sr))', mQ_total*1.e6),
+                 ('mU (total) (uK sqrt(sr))', mU_total*1.e6),
+                 ('mV (total) (uK sqrt(sr))', mV_total*1.e6),
+                 linebreak,
+                 ('dT_Q (beamspot) (uK)', mQ_total*1.e6/np.sqrt(Omega_beam)),
+                 ('dT_U (beamspot) (uK)', mU_total*1.e6/np.sqrt(Omega_beam)),
+                 ('dT_V (beamspot) (uK)', mV_total*1.e6/np.sqrt(Omega_beam)),
+                 linebreak,
+                 ('dT_Q (pixel) (uK)', mQ_total*1.e6/np.sqrt(Omega_pixel)),
+                 ('dT_U (pixel) (uK)', mU_total*1.e6/np.sqrt(Omega_pixel)),
+                 ('dT_V (pixel) (uK)', mV_total*1.e6/np.sqrt(Omega_pixel))]
+
+    elemlist += elemlist2
+
+    with open(fname, 'w') as f:
+        for key, value in elemlist:
+            values = [fmtstr(i) for i in value]
+            f.write(linestr.format(key, *values) + '\r\n')

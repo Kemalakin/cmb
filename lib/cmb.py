@@ -94,10 +94,14 @@ def get_dls(lensed=True, fname=None):
     try:
         cls = np.loadtxt(clsfname)
     except IOError:
-        fnamebase, _ = fname.rsplit('.', 1)
-        fnamebase, _ = fname.rsplit('_lensed', 1)
-        fnamebase, _ = fname.rsplit('_cl', 1)
-        generate_cls(fnamebase + '.ini', output=fnamebase)
+        fnamebase = fname.rsplit('.', 1)[0]
+        fnamebase = fnamebase.rsplit('_lensed', 1)[0]
+        fnamebase = fnamebase.rsplit('_cl', 1)[0]
+        try:
+            generate_cls(fnamebase + '.ini', output=fnamebase)
+        except IOError:
+            print generate_cls(fnamebase + '_parameters.ini',
+                               output=fnamebase + '_')
         cls = np.loadtxt(clsfname)
 
     pdict = {}
@@ -188,7 +192,8 @@ def generate_maps(Nside=512, lensed=True, n2r=False, return_cls=False,
     """
     cldict = get_cls(lensed=lensed, fname=fname)
     cls = [cldict[xx] for xx in ('TT', 'EE', 'BB', 'TE')]
-    maps = list(hp.synfast(cls, nside=Nside, pol=True, new=True))
+    maps = list(hp.synfast(cls, nside=Nside, pol=True, new=True,
+                           verbose=False))
     if not n2r:
         for i in range(len(maps)):
             maps[i] = hp.reorder(maps[i], r2n=True)

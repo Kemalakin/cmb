@@ -31,7 +31,7 @@ datapath = os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(
 
 def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
                                  lensed=False, fgfile=None, regnoise=0.,
-                                 verbose=True, _debug=False):
+                                 verbose=True, _debug=False, noisefactor=False):
     """
     Perform an end-to-end simulation of ILC reconstruction.
 
@@ -102,12 +102,18 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
         if verbose:
             print "Instrument/regularization noise with std dev {0} uK".format(
                 regnoise)
-        noise = regnoise*np.random.randn(*np.shape(cmbQUmaps[0]))
+        # noise = regnoise*np.random.randn(*np.shape(cmbQUmaps[0]))
     else:
         if verbose:
             print "No instrument/regularization noise."
         noise = 0.
-    totalQUmaps = [cmbQUmaps + dustmap + noise for dustmap in dustmaps]
+
+    totalQUmaps = []
+    for dustmap in dustmaps:
+        # Make new noise realization for each map
+        noise = regnoise*np.random.randn(*np.shape(cmbQUmaps))
+        totalQUmaps.append(cmbQUmaps + dustmap + noise)
+    # totalQUmaps = [cmbQUmaps + dustmap + noise for dustmap in dustmaps]
 
     # Perform ILC on each set of Q and U maps
     #
@@ -120,8 +126,11 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
     totalUmaps = np.vstack([totalQUmaps[i][1] for i in range(len(totalQUmaps))])
 
     if verbose: print "Performing ILC on Q/U maps separately."
-    Qweights = lib.ilc.compute_ilc_weights(totalQmaps)
-    Uweights = lib.ilc.compute_ilc_weights(totalUmaps)
+    if noisefactor:
+        print ("Using modified covariance matrix (Efstathiou 2009): F -> F - "
+               "diag(var(maps)).")
+    Qweights = lib.ilc.compute_ilc_weights(totalQmaps, noisefactor=noisefactor)
+    Uweights = lib.ilc.compute_ilc_weights(totalUmaps, noisefactor=noisefactor)
 
     if verbose: print "Reconstructing ILC Q/U maps."
     ilcQmap = np.dot(Qweights, totalQmaps)
@@ -135,12 +144,15 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
 
     retdict = {'cl_in': cldict, 'cl_out': recon_cldict,
                'cmbTmap': Tmap, 'cmbQUmaps': cmbQUmaps, 'dustmaps': dustmaps,
+               'noisemap': noise,
                'totalQUmaps': totalQUmaps,
                'weights_Q': Qweights, 'weights_U': Uweights,
                'ilcQmap': ilcQmap, 'ilcUmap': ilcUmap,
                'frequencies': frequencies}
 
     if _debug:
+        noise_cls = hp.anafast()
+
         if verbose:
             print ("Performing analytical ILC simulation in "
                   "foreground/background space")
