@@ -34,11 +34,13 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
                                  lensed=False, fgfile=None, regnoise=None,
                                  verbose=True, _debug=False,
                                  modcov=False,
-                                 regeneratedust=False):
+                                 regeneratedust=False,
+                                 cal_gains=None):
     """
     Perform an end-to-end simulation of ILC reconstruction.
 
-    1) Generate a fake polarized CMB sky.
+    1) Generate a fake polarized CMB sky (with optional power spectrum
+    calibration gain).
     2) Load/generate dust maps at all of the specified frequencies.
     3) Combine the dust maps and (optionally) add map noise.
     4) Perform ILC on total Q and U maps separately.
@@ -59,6 +61,17 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
     `verbose` - Be talkative.
     `_debug` - Also perform ILC in foreground-background space, to faciliate
         the comparison of results.
+    `regeneratedust` - Whether or not dust maps should be re-made for each
+        instance. Generally should not, since the dust maps are not stochastic.
+    `cal_gains` - Determines if a calibration gain factor should be injected
+        into the power spectrum before making the map. `cal_gains` should be a
+        list with 2 sub-lists. The first sublist contains the ells at which the
+        gain should be applied, and the second sublist contains the gain factors
+        corresponding to the ells. E.g.,
+
+        cal_gains = [[10, 11, 12],        # Apply gain to ell = 10, 11, 12
+                     [1.05, 1.1, 1.05]]   # Gains are 1.05, 1.1, 1.05
+
     """
     frequencies = np.array(frequencies)
     if verbose:
@@ -70,7 +83,8 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
     if verbose:
         print "Constructing CMB temperature and polarization maps."
     (Tmap, Qmap, Umap), cldict = lib.cmb.generate_maps(Nside=Nside,
-                        n2r=True, return_cls=True, fname=fname, lensed=lensed)
+                        n2r=True, return_cls=True, fname=fname, lensed=lensed,
+                        cal_gains=cal_gains)
     cmbQUmaps = np.vstack([Qmap, Umap])  # uK
 
     # Try to load dust from file.
