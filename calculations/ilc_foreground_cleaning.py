@@ -18,6 +18,7 @@ __version__ = 20150211
 
 import inspect
 import os
+import collections
 
 import numpy as np
 import healpy as hp
@@ -30,8 +31,10 @@ datapath = os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(
 
 
 def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
-                                 lensed=False, fgfile=None, regnoise=0.,
-                                 verbose=True, _debug=False, noisefactor=False):
+                                 lensed=False, fgfile=None, regnoise=None,
+                                 verbose=True, _debug=False,
+                                 modcov=False,
+                                 regeneratedust=False):
     """
     Perform an end-to-end simulation of ILC reconstruction.
 
@@ -75,6 +78,8 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
         fgfile = datapath + 'dust.npy'
     try:
         dustmaps = np.load(fgfile)
+        if regeneratedust or (len(dustmaps) != len(frequencies)):
+            raise IOError
         if verbose: print "Loaded dust from file: {0}".format(fgfile)
     except (AttributeError, IOError):
         if verbose:
@@ -98,21 +103,27 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
     # Construct CMB + foreground maps
     if verbose:
         print "Combining maps."
-    if regnoise:
+    if regnoise is not None:
+        if not isinstance(regnoise, collections.Iterable):
+            regnoise = [regnoise]*len(dustmaps)
         if verbose:
             print "Instrument/regularization noise with std dev {0} uK".format(
                 regnoise)
         # noise = regnoise*np.random.randn(*np.shape(cmbQUmaps[0]))
     else:
+        regnoise = [0.]*len(dustmaps)
         if verbose:
             print "No instrument/regularization noise."
-        noise = 0.
 
     totalQUmaps = []
-    for dustmap in dustmaps:
-        # Make new noise realization for each map
-        noise = regnoise*np.random.randn(*np.shape(cmbQUmaps))
+    noisemaps = []
+    for i in range(len(dustmaps)):
+        dustmap = dustmaps[i]
+        rn = regnoise[i]
+        noise = rn*np.random.randn(*np.shape(cmbQUmaps))
+        noisemaps.append(noise)
         totalQUmaps.append(cmbQUmaps + dustmap + noise)
+    noisemaps = np.array(noisemaps)
     # totalQUmaps = [cmbQUmaps + dustmap + noise for dustmap in dustmaps]
 
     # Perform ILC on each set of Q and U maps
@@ -126,11 +137,11 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
     totalUmaps = np.vstack([totalQUmaps[i][1] for i in range(len(totalQUmaps))])
 
     if verbose: print "Performing ILC on Q/U maps separately."
-    if noisefactor:
+    if modcov:
         print ("Using modified covariance matrix (Efstathiou 2009): F -> F - "
                "diag(var(maps)).")
-    Qweights = lib.ilc.compute_ilc_weights(totalQmaps, noisefactor=noisefactor)
-    Uweights = lib.ilc.compute_ilc_weights(totalUmaps, noisefactor=noisefactor)
+    Qweights = lib.ilc.compute_ilc_weights(totalQmaps, modcov=modcov)
+    Uweights = lib.ilc.compute_ilc_weights(totalUmaps, modcov=modcov)
 
     if verbose: print "Reconstructing ILC Q/U maps."
     ilcQmap = np.dot(Qweights, totalQmaps)
@@ -144,15 +155,13 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
 
     retdict = {'cl_in': cldict, 'cl_out': recon_cldict,
                'cmbTmap': Tmap, 'cmbQUmaps': cmbQUmaps, 'dustmaps': dustmaps,
-               'noisemap': noise,
+               'noisemaps': noisemaps,
                'totalQUmaps': totalQUmaps,
                'weights_Q': Qweights, 'weights_U': Uweights,
                'ilcQmap': ilcQmap, 'ilcUmap': ilcUmap,
-               'frequencies': frequencies}
+               'frequencies': frequencies, 'regnoise': regnoise}
 
     if _debug:
-        noise_cls = hp.anafast()
-
         if verbose:
             print ("Performing analytical ILC simulation in "
                   "foreground/background space")

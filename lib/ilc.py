@@ -21,7 +21,7 @@ import numpy as np
 import healpy as hp
 
 
-def compute_ilc_weights(maps, masks=None, noisefactor=False):
+def compute_ilc_weights(maps, masks=None, modcov=False):
     """
     Computes a set of ILC weights of a given set of `maps`, for each region
     specified by `mask`.
@@ -45,23 +45,23 @@ def compute_ilc_weights(maps, masks=None, noisefactor=False):
     """
     nd = np.ndim(masks)
     if nd == 0:
-        return _compute_ilc_weights(maps, noisefactor=noisefactor)
+        return _compute_ilc_weights(maps, modcov=modcov)
     elif np.ndim(masks) == 1:
         mask = np.logical_not(np.outer(np.ones(len(maps)), masks))
         maps = np.ma.masked_array(maps, mask)
-        return _compute_ilc_weights(maps, noisefactor=noisefactor)
+        return _compute_ilc_weights(maps, modcov=modcov)
     else:
         ws = []
         for i in range(len(masks)):
             mask = np.logical_not(np.outer(np.ones(len(maps)), masks[i]))
             ms = np.ma.masked_array(maps, mask)
-            w = _compute_ilc_weights(ms, noisefactor=noisefactor)
+            w = _compute_ilc_weights(ms, modcov=modcov)
             ws.append(w)
         ws = np.array(ws)
         return ws
 
 
-def _compute_ilc_weights(maps, noisefactor=False):
+def _compute_ilc_weights(maps, modcov=False):
     """
     Helper function for compute_ilc_weights().
 
@@ -77,7 +77,7 @@ def _compute_ilc_weights(maps, noisefactor=False):
         covfunc = lambda x: np.cov(x, ddof=0)
         varfunc = lambda x: np.var(x, ddof=0, axis=-1)
     cov = covfunc(maps)
-    if noisefactor:
+    if modcov:
         cov -= np.diag(varfunc(maps))
     icov = np.linalg.pinv(cov)  # Naive inversion, since cov ~ k x k is small
     sumicov = icov.sum(0)
