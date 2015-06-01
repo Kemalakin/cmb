@@ -90,7 +90,10 @@ def get_dls(lensed=True, fname=None):
         fname, _ = fname.rsplit('.', 1)
     if (not fname.endswith('_lensed')) and lensed:
         fname = fname + '_lensed'
-    clsfname = cmbpath + fname + '.dat'
+    if fname.startswith('/'):
+        clsfname = fname + '.dat'
+    else:
+        clsfname = cmbpath + fname + '.dat'
     try:
         cls = np.loadtxt(clsfname)
     except IOError:
