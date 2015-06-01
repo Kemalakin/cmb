@@ -6,6 +6,7 @@ import numpy as np
 import healpy as hp
 
 import calculations.calibration_gain as cg
+import lib
 
 calcpath = os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(
     lib)))) + '/'
@@ -28,7 +29,7 @@ baseargdict = {'lensed': lensed,
                'modcov': modcov,
                'fname': fname,
                'verbose': verbose,
-               'N': 100}
+               'N': 2}
 
 argdicts = {}
 arglist = [('low_2_lownoise', [200., 270.], 0.1, '(200, 270) GHz, Low Noise'),
@@ -61,4 +62,4 @@ for name, ad in argdicts.items():
     print("Finished computing ({1} s): {0}".format(name, tf - t0))
     print('-'*30)
 
-cg.save_data(results, calcpath + 'results.pickle')
+

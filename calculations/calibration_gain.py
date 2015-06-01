@@ -19,6 +19,7 @@ __releasestatus__ = 'beta'
 
 import os
 import inspect
+import pickle
 
 import numpy as np
 import healpy as hp
@@ -147,7 +148,7 @@ def myplot(cld, name, label, nf=1., bbmax=0.1, cldict_input=None):
 
 def save_data(results, fname='results.pickle'):
     copydict = results.copy()
-    for key in copydict.keys():
-        del copydict[key]['figure']
+#    for key in copydict.keys():
+#        del copydict[key]['figure']
     with open(fname, 'w') as f:
         pickle.dump(copydict, f)
