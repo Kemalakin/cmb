@@ -17,6 +17,9 @@ from __future__ import print_function
 __version__ = 20150528
 __releasestatus__ = 'beta'
 
+import os
+import inspect
+
 import numpy as np
 import healpy as hp
 import matplotlib.pyplot as plt
@@ -26,7 +29,7 @@ import calculations.ilc_foreground_cleaning
 
 datapath = os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(
     lib))) + '/../data/') + '/'
-
+print("datapath = ", datapath) #DELME
 
 def many_realizations(freqs, N=100, xxs=['BB'], fname=None, regnoise=0., lensed=False,
                       modcov=False, verbose=False, **kwargs):
