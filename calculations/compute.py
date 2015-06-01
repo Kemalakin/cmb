@@ -9,7 +9,7 @@ import calculations.calibration_gain as cg
 import lib
 
 calcpath = os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(
-    lib)))) + '/'
+    lib))) + '/../calculations/') + '/'
 datapath = os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(
     lib))) + '/../data/') + '/'
 
@@ -62,4 +62,5 @@ for name, ad in argdicts.items():
     print("Finished computing ({1} s): {0}".format(name, tf - t0))
     print('-'*30)
 
-
+print "Saving results to: ", calcpath + 'results.pickle'
+cg.save_data(results, calcpath + 'results.pickle')
