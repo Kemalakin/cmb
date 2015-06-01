@@ -6,6 +6,7 @@ import numpy as np
 import healpy as hp
 
 import calculations.calibration_gain as cg
+import lib
 
 calcpath = os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(
     lib)))) + '/'
