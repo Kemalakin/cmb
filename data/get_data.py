@@ -11,6 +11,8 @@ Example:
 
 $ cd /path/to/cmb/data
 $ python get_data.py
+
+Make sure the cmb base directory is in your $PYTHONPATH.
 """
 __version__ = 20150106
 __releasestatus__ = 'beta'
