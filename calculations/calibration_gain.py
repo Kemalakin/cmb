@@ -20,17 +20,20 @@ __releasestatus__ = 'beta'
 import os
 import inspect
 import pickle
+import time
 
 import numpy as np
 import healpy as hp
 import matplotlib.pyplot as plt
+from IPython import parallel as p
+rc = p.Client()
+cluster = rc[:]
 
 import lib
 import calculations.ilc_foreground_cleaning
 
 datapath = os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(
     lib))) + '/../data/') + '/'
-print("datapath = ", datapath) #DELME
 
 def many_realizations(freqs, N=100, xxs=['BB'], fname=None, regnoise=0., lensed=False,
                       modcov=False, verbose=False, **kwargs):
@@ -43,7 +46,7 @@ def many_realizations(freqs, N=100, xxs=['BB'], fname=None, regnoise=0., lensed=
         regendust = True if (i == 0) else False
         retdict = reconfunc(freqs, _debug=False, fname=fname, regnoise=regnoise,
                             lensed=lensed, verbose=verbose, modcov=modcov,
-                            regeneratedust=regendust)
+                            regeneratedust=regendust, **kwargs)
         cl_out = retdict['cl_out']
         for key in xxs:
             cldict[key].append(cl_out[key])
@@ -52,6 +55,54 @@ def many_realizations(freqs, N=100, xxs=['BB'], fname=None, regnoise=0., lensed=
 
         print("Finished: {0} of {1}".format(i+1, N), end='\r')
     print("\n")
+
+    for key, value in cldict.items():
+        cldict[key] = np.array(value)
+        cldict[key + '_mean'] = np.mean(cldict[key], axis=0)
+        cldict[key + '_std'] = np.std(cldict[key], axis=0)
+
+    cldict['ell'] = cl_out['ell']
+    cldict['regnoise'] = retdict['regnoise']
+
+    return cldict
+
+
+def many_realizations_parallel(freqs, N=100, xxs=['BB'], fname=None,
+                              regnoise=0., lensed=False,
+                              modcov=False, verbose=False, **kwargs):
+    # print("Finished: {0} of {1}".format(0, N), end='\r')
+    reconfunc = calculations.ilc_foreground_cleaning.polarized_ilc_reconstruction
+    cldict = {key: [] for key in xxs}
+    cldict['weights_Q'] = []
+    cldict['weights_U'] = []
+
+    # Generate dust maps
+    calculations.ilc_foreground_cleaning.regenerate_dust(freqs)
+
+    # Make and process N CMB realizations.
+    dummyfunc = lambda n: reconfunc(freqs, _debug=False, fname=fname,
+                                    regnoise=regnoise,  lensed=lensed,
+                                    verbose=verbose, modcov=modcov,
+                                    regeneratedust=False, **kwargs)
+    print("Distributing {0} iterations to {1} cores.".format(N, len(cluster)))
+    t0 = time.time()
+    retdicts = cluster.apply(dummyfunc, range(N))
+    tf = time.time()
+    print("Finished computation in {0} seconds".format(tf - t0))
+    # for i in range(N):
+    #     retdict = reconfunc(freqs, _debug=False, fname=fname, regnoise=regnoise,
+    #                         lensed=lensed, verbose=verbose, modcov=modcov,
+    #                         regeneratedust=False, **kwargs)
+    print("Collating results.")
+    for retdict in retdicts:
+        cl_out = retdict['cl_out']
+        for key in xxs:
+            cldict[key].append(cl_out[key])
+        cldict['weights_Q'].append(retdict['weights_Q'])
+        cldict['weights_U'].append(retdict['weights_U'])
+
+    #     print("Finished: {0} of {1}".format(i+1, N), end='\r')
+    # print("\n")
 
     for key, value in cldict.items():
         cldict[key] = np.array(value)

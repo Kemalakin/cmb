@@ -30,6 +30,29 @@ datapath = os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(
     lib))) + '/../data/') + '/'
 
 
+def regenerate_dust(frequencies, fgfile=None, Nside=512, verbose=True):
+    """
+    Perform only the dust map generation step of the ILC simulation.
+    """
+    if verbose:
+        print "Failed to load dust from file: {0}".format(fgfile)
+        print "Generating new dust maps."
+    # 3 deg smoothed QU polarized synchrotron-tracking dust maps
+    MJypsr = lib.conversions.MJypsr  # W/(m^2 Hz sr) per MJy/sr
+    convs = [1.e6/(lib.conversions.dBdT(f)/MJypsr)  # uK_CMB/(MJy/sr)
+             for f in frequencies]
+
+    dustmaps = [lib.foregrounds.generate_synchro_traced_dust_QU_map(nu=nu,
+                        Nside=Nside,  n2r=True, sigma=3.*np.pi/180)
+                for nu in frequencies]
+    dustmaps = [dustmaps[i]*convs[i] for i in range(len(dustmaps))]   # uK_CMB
+    dustmaps = np.array(dustmaps)
+    f = fgfile if fgfile else datapath + 'dust.npy'
+    np.save(f, dustmaps)
+    if verbose:
+        print "Saving dust maps to: {0}".format(f)
+
+
 def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
                                  lensed=False, fgfile=None, regnoise=None,
                                  verbose=True, _debug=False,
@@ -96,23 +119,24 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
             raise IOError
         if verbose: print "Loaded dust from file: {0}".format(fgfile)
     except (AttributeError, IOError):
-        if verbose:
-            print "Failed to load dust from file: {0}".format(fgfile)
-            print "Generating new dust maps."
-        # 3 deg smoothed QU polarized synchrotron-tracking dust maps
-        MJypsr = lib.conversions.MJypsr  # W/(m^2 Hz sr) per MJy/sr
-        convs = [1.e6/(lib.conversions.dBdT(f)/MJypsr)  # uK_CMB/(MJy/sr)
-                 for f in frequencies]
-
-        dustmaps = [lib.foregrounds.generate_synchro_traced_dust_QU_map(nu=nu,
-                            Nside=Nside,  n2r=True, sigma=3.*np.pi/180)
-                    for nu in frequencies]
-        dustmaps = [dustmaps[i]*convs[i] for i in range(len(dustmaps))]   # uK_CMB
-        dustmaps = np.array(dustmaps)
-        f = fgfile if fgfile else datapath + 'dust.npy'
-        np.save(f, dustmaps)
-        if verbose:
-            print "Saving dust maps to: {0}".format(f)
+        regenerate_dust(frequencies, fgfile, Nside, verbose)
+        # if verbose:
+        #     print "Failed to load dust from file: {0}".format(fgfile)
+        #     print "Generating new dust maps."
+        # # 3 deg smoothed QU polarized synchrotron-tracking dust maps
+        # MJypsr = lib.conversions.MJypsr  # W/(m^2 Hz sr) per MJy/sr
+        # convs = [1.e6/(lib.conversions.dBdT(f)/MJypsr)  # uK_CMB/(MJy/sr)
+        #          for f in frequencies]
+        #
+        # dustmaps = [lib.foregrounds.generate_synchro_traced_dust_QU_map(nu=nu,
+        #                     Nside=Nside,  n2r=True, sigma=3.*np.pi/180)
+        #             for nu in frequencies]
+        # dustmaps = [dustmaps[i]*convs[i] for i in range(len(dustmaps))]   # uK_CMB
+        # dustmaps = np.array(dustmaps)
+        # f = fgfile if fgfile else datapath + 'dust.npy'
+        # np.save(f, dustmaps)
+        # if verbose:
+        #     print "Saving dust maps to: {0}".format(f)
 
     # Construct CMB + foreground maps
     if verbose:
