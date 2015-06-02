@@ -30,10 +30,18 @@ datapath = os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(
     lib))) + '/../data/') + '/'
 
 
-def regenerate_dust(frequencies, fgfile=None, Nside=512, verbose=True):
+def regenerate_dust(frequencies, fgfile=None, Nside=512, verbose=True, force=False):
     """
     Perform only the dust map generation step of the ILC simulation.
     """
+    if not force:
+        try:
+            np.load(fgfile)
+            if verbose:
+                print "Dust map {0} already exists.".format(fgfile)
+            return
+        except IOError:
+            pass
     if verbose:
         print "Failed to load dust from file: {0}".format(fgfile)
         print "Generating new dust maps."

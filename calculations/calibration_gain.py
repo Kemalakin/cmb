@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt
 from IPython import parallel as p
 rc = p.Client()
 cluster = rc[:]
+cluster.block = True
 
 import lib
 import calculations.ilc_foreground_cleaning
@@ -46,7 +47,7 @@ def many_realizations(freqs, N=100, xxs=['BB'], fname=None, regnoise=0., lensed=
         regendust = True if (i == 0) else False
         retdict = reconfunc(freqs, _debug=False, fname=fname, regnoise=regnoise,
                             lensed=lensed, verbose=verbose, modcov=modcov,
-                            regeneratedust=regendust, **kwargs)
+                            regeneratedust=regendust)
         cl_out = retdict['cl_out']
         for key in xxs:
             cldict[key].append(cl_out[key])
@@ -69,7 +70,7 @@ def many_realizations(freqs, N=100, xxs=['BB'], fname=None, regnoise=0., lensed=
 
 def many_realizations_parallel(freqs, N=100, xxs=['BB'], fname=None,
                               regnoise=0., lensed=False,
-                              modcov=False, verbose=False, **kwargs):
+                              modcov=False, verbose=False, name=None, **kwargs):
     # print("Finished: {0} of {1}".format(0, N), end='\r')
     reconfunc = calculations.ilc_foreground_cleaning.polarized_ilc_reconstruction
     cldict = {key: [] for key in xxs}
@@ -77,16 +78,26 @@ def many_realizations_parallel(freqs, N=100, xxs=['BB'], fname=None,
     cldict['weights_U'] = []
 
     # Generate dust maps
-    calculations.ilc_foreground_cleaning.regenerate_dust(freqs)
+    if name is not None:
+        dustname = datapath + name + '_dust.npy'
+    else:
+        dustname = None
+    calculations.ilc_foreground_cleaning.regenerate_dust(freqs, fgfile=dustname)
 
     # Make and process N CMB realizations.
-    dummyfunc = lambda n: reconfunc(freqs, _debug=False, fname=fname,
-                                    regnoise=regnoise,  lensed=lensed,
-                                    verbose=verbose, modcov=modcov,
-                                    regeneratedust=False, **kwargs)
+#    def dummyfunc(n):
+    def dummyfunc(n, freqs, _debug, fname, regnoise, lensed, verbose, 
+                  modcov, regeneratedust):
+        reconfunc = calculations.ilc_foreground_cleaning.polarized_ilc_reconstruction
+        temp = reconfunc(freqs, _debug=False, fname=fname,
+                         regnoise=regnoise,  lensed=lensed,
+                         verbose=verbose, modcov=modcov,
+                         regeneratedust=False)
+        return temp
     print("Distributing {0} iterations to {1} cores.".format(N, len(cluster)))
     t0 = time.time()
-    retdicts = cluster.apply(dummyfunc, range(N))
+    retdicts = cluster.apply(dummyfunc, range(N), freqs, False, fname, regnoise, lensed,
+                             verbose, modcov, False)
     tf = time.time()
     print("Finished computation in {0} seconds".format(tf - t0))
     # for i in range(N):

@@ -29,15 +29,15 @@ baseargdict = {'lensed': lensed,
                'modcov': modcov,
                'fname': fname,
                'verbose': verbose,
-               'N': 2}
+               'N': 100}
 
 argdicts = {}
 arglist = [('low_2_lownoise', [200., 270.], 0.1, '(200, 270) GHz, Low Noise'),
-           #('all_4', [200., 270., 350., 600.], 1., 'All 4 Frequencies, Normal Noise'),
-           #('low_high_2', [200., 600.], 1., '(200, 600) GHz, Normal Noise'),
-           #('all_4_lownoise', [200., 270., 350., 600.], 0.1, 'All 4 Frequencies, Low Noise'),
-           #('200_350', [200., 350.], 1., '(200, 350) GHz, Normal Noise'),
-           #('350_600', [350., 600.], 1., '(350, 600) GHz, Normal Noise')
+           ('all_4', [200., 270., 350., 600.], 1., 'All 4 Frequencies, Normal Noise'),
+           ('low_high_2', [200., 600.], 1., '(200, 600) GHz, Normal Noise'),
+           ('all_4_lownoise', [200., 270., 350., 600.], 0.1, 'All 4 Frequencies, Low Noise'),
+           ('200_350', [200., 350.], 1., '(200, 350) GHz, Normal Noise'),
+           ('350_600', [350., 600.], 1., '(350, 600) GHz, Normal Noise')
            ]
 
 for i in arglist:
@@ -45,7 +45,8 @@ for i in arglist:
     regnoise = np.array([noisedict[float(freq)] for freq in freqs])
     freqs = np.array(freqs)*1.e9
     argdict = baseargdict.copy()
-    argdict.update({'freqs': freqs, 'regnoise': regnoise*noisefact, 'noisefactor': noisefact})
+    argdict.update({'freqs': freqs, 'regnoise': regnoise*noisefact,
+                    'noisefactor': noisefact, 'name': name})
     toadd = {'label': label, 'args': argdict}
     argdicts[name] = toadd
 
@@ -54,7 +55,8 @@ results = {}
 for name, ad in argdicts.items():
     t0 = time.time()
     print("Computing case: {0}".format(name))
-    cld = cg.many_realizations(**(ad['args']))
+    cld = cg.many_realizations_parallel(**(ad['args']))
+#    cld = cg.many_realizations(**(ad['args']))
     results[name] = {'cldict': cld}
     # f = myplot(cld, name, ad['label'])
     # results[name]['figure'] = f
