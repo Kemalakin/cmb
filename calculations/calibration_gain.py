@@ -70,9 +70,8 @@ def many_realizations(freqs, N=100, xxs=['BB'], fname=None, regnoise=0., lensed=
 
 def many_realizations_parallel(freqs, N=100, xxs=['BB'], fname=None,
                               regnoise=0., lensed=False,
-                              modcov=False, verbose=False, name=None, **kwargs):
-    # print("Finished: {0} of {1}".format(0, N), end='\r')
-    reconfunc = calculations.ilc_foreground_cleaning.polarized_ilc_reconstruction
+                              modcov=False, verbose=False, name=None,
+                              cal_gains=None, **kwargs):
     cldict = {key: [] for key in xxs}
     cldict['weights_Q'] = []
     cldict['weights_U'] = []
@@ -85,25 +84,29 @@ def many_realizations_parallel(freqs, N=100, xxs=['BB'], fname=None,
     calculations.ilc_foreground_cleaning.regenerate_dust(freqs, fgfile=dustname)
 
     # Make and process N CMB realizations.
-#    def dummyfunc(n):
-    def dummyfunc(n, freqs, _debug, fname, regnoise, lensed, verbose, 
+    def dummyfunc(n, freqs, _debug, fname, regnoise, lensed, verbose,
                   modcov, regeneratedust):
         reconfunc = calculations.ilc_foreground_cleaning.polarized_ilc_reconstruction
         temp = reconfunc(freqs, _debug=False, fname=fname,
                          regnoise=regnoise,  lensed=lensed,
                          verbose=verbose, modcov=modcov,
-                         regeneratedust=False)
+                         regeneratedust=False, cal_gains=cal_gains)
         return temp
     print("Distributing {0} iterations to {1} cores.".format(N, len(cluster)))
     t0 = time.time()
-    retdicts = cluster.apply(dummyfunc, range(N), freqs, False, fname, regnoise, lensed,
-                             verbose, modcov, False)
+    error = True
+    while error:
+        try:
+            error = False
+            retdicts = cluster.apply(dummyfunc, range(N), freqs, False,
+                                     fname, regnoise, lensed, verbose,
+                                     modcov, False)
+        except p.CompositeError:
+            error = True
+            print("Error in worker process. Re-trying.")
+
     tf = time.time()
     print("Finished computation in {0} seconds".format(tf - t0))
-    # for i in range(N):
-    #     retdict = reconfunc(freqs, _debug=False, fname=fname, regnoise=regnoise,
-    #                         lensed=lensed, verbose=verbose, modcov=modcov,
-    #                         regeneratedust=False, **kwargs)
     print("Collating results.")
     for retdict in retdicts:
         cl_out = retdict['cl_out']

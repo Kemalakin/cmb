@@ -51,16 +51,22 @@ for i in arglist:
     argdicts[name] = toadd
 
 results = {}
-
+ells = [10., 20., 30.]
+gains = [1.05, 1.05, 1.05]
 for name, ad in argdicts.items():
+    results2 = {}
     t0 = time.time()
     print("Computing case: {0}".format(name))
-    cld = cg.many_realizations_parallel(**(ad['args']))
-#    cld = cg.many_realizations(**(ad['args']))
-    results[name] = {'cldict': cld}
-    # f = myplot(cld, name, ad['label'])
-    # results[name]['figure'] = f
-    tf = time.time()
+    for i in range(len(ells)):
+        ell = ells[i]
+        gain = gains[i]
+        cal_gains = [[ell], [gain]]
+
+        cld = cg.many_realizations_parallel(cal_gains=cal_gains,
+                                            **(ad['args']))
+        results2[ell] = {'cldict': cld, 'gain': gain}
+        tf = time.time()
+    results[name] = results2
     print("Finished computing ({1} s): {0}".format(name, tf - t0))
     print('-'*30)
 
