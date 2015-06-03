@@ -21,10 +21,12 @@ import os
 import inspect
 import pickle
 import time
+import errno
 
 import numpy as np
 import healpy as hp
 import matplotlib.pyplot as plt
+import h5py
 from IPython import parallel as p
 rc = p.Client()
 cluster = rc[:]
@@ -35,6 +37,44 @@ import calculations.ilc_foreground_cleaning
 
 datapath = os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(
     lib))) + '/../data/') + '/'
+
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc: # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else: raise
+
+
+def save_dict_to_hd5(f, d, replace=False, prefix=None):
+    # Define the recursive worker function
+    def _recurse(f, d):
+        for key, value in d.items():
+            if isinstance(value, dict):
+                grp = f.create_group(key)
+                _recurse(grp, value)
+            else:
+                f.create_dataset(key, data=value)
+
+    # Make an hd5 file if we haven't passed one in
+    if not isinstance(f, (h5py.File, h5py.Group)):
+        prefix = '.' if (prefix is None) else prefix
+        fname = os.path.abspath(prefix + '/' + f)
+        print("Making hd5 file: {0}".format(fname))
+        dirname = os.path.dirname(fname)
+        mkdir_p(dirname)
+        if replace:
+            try:
+                os.remove(fname)
+            except OSError:
+                pass
+        with h5py.File(fname) as ff:
+            _recurse(ff, d)
+    else:
+        _recurse(f, d)
+
 
 def many_realizations(freqs, N=100, xxs=['BB'], fname=None, regnoise=0., lensed=False,
                       modcov=False, verbose=False, **kwargs):

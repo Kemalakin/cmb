@@ -61,17 +61,23 @@ for name, ad in argdicts.items():
     print("Computing case: {0}".format(name))
     print("ells = {0}".format(ells))
     for i in range(len(ells)):
-        t1 = time.time()
         ell = ells[i]
         gain = gains[i]
-        print("Starting ell = {0}".format(ell))
-        cal_gains = [[ell], [gain]]
+        fname = 'ell_{0}.hd5'.format(str(int(ell)))
+        fname = os.path.abspath(name + '/' + fname)
+        if os.path.exists(fname):
+            print("ell = {0} already exists. Skipping.".format(ell))
+        else:
+            print("Starting ell = {0}".format(ell))
+            t1 = time.time()
+            cal_gains = [[ell], [gain]]
 
-        cld = cg.many_realizations_parallel(cal_gains=cal_gains,
-                                            **(ad['args']))
-        results2[ell] = {'cldict': cld, 'gain': gain}
-        t2 = time.time()
-        print("Finished ell = {0} in {1} seconds.".format(ell, t2-t1))
+            cld = cg.many_realizations_parallel(cal_gains=cal_gains,
+                                                **(ad['args']))
+            cg.save_dict_to_hd5(fname, cld, prefix=name)
+            results2[ell] = {'cldict': cld, 'gain': gain}
+            t2 = time.time()
+            print("Finished ell = {0} in {1} seconds.".format(ell, t2-t1))
         print('.'*10)
     tf = time.time()
     results[name] = results2
