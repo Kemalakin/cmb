@@ -127,7 +127,7 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
             raise IOError
         if verbose: print "Loaded dust from file: {0}".format(fgfile)
     except (AttributeError, IOError):
-        regenerate_dust(frequencies, fgfile, Nside, verbose)
+        regenerate_dust(frequencies, fgfile, Nside, verbose, force=True)
         # if verbose:
         #     print "Failed to load dust from file: {0}".format(fgfile)
         #     print "Generating new dust maps."

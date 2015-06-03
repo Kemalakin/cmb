@@ -85,7 +85,7 @@ def many_realizations_parallel(freqs, N=100, xxs=['BB'], fname=None,
 
     # Make and process N CMB realizations.
     def dummyfunc(n, freqs, _debug, fname, regnoise, lensed, verbose,
-                  modcov, regeneratedust):
+                  modcov, regeneratedust, cal_gains):
         reconfunc = calculations.ilc_foreground_cleaning.polarized_ilc_reconstruction
         temp = reconfunc(freqs, _debug=False, fname=fname,
                          regnoise=regnoise,  lensed=lensed,
@@ -100,7 +100,7 @@ def many_realizations_parallel(freqs, N=100, xxs=['BB'], fname=None,
             error = False
             retdicts = cluster.apply(dummyfunc, range(N), freqs, False,
                                      fname, regnoise, lensed, verbose,
-                                     modcov, False)
+                                     modcov, False, cal_gains)
         except p.CompositeError:
             error = True
             print("Error in worker process. Re-trying.")

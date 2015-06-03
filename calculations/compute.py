@@ -40,6 +40,8 @@ arglist = [('low_2_lownoise', [200., 270.], 0.1, '(200, 270) GHz, Low Noise'),
            ('350_600', [350., 600.], 1., '(350, 600) GHz, Normal Noise')
            ]
 
+tstart = time.time()
+
 for i in arglist:
     name, freqs, noisefact, label = i
     regnoise = np.array([noisedict[float(freq)] for freq in freqs])
@@ -51,24 +53,34 @@ for i in arglist:
     argdicts[name] = toadd
 
 results = {}
-ells = [10., 20., 30.]
-gains = [1.05, 1.05, 1.05]
+ells = np.unique(np.logspace(np.log10(2), np.log10(400), 50).astype('int'))
+gains = [1.05]*len(ells)
 for name, ad in argdicts.items():
     results2 = {}
     t0 = time.time()
     print("Computing case: {0}".format(name))
+    print("ells = {0}".format(ells))
     for i in range(len(ells)):
+        t1 = time.time()
         ell = ells[i]
         gain = gains[i]
+        print("Starting ell = {0}".format(ell))
         cal_gains = [[ell], [gain]]
 
         cld = cg.many_realizations_parallel(cal_gains=cal_gains,
                                             **(ad['args']))
         results2[ell] = {'cldict': cld, 'gain': gain}
-        tf = time.time()
+        t2 = time.time()
+        print("Finished ell = {0} in {1} seconds.".format(ell, t2-t1))
+        print('.'*10)
+    tf = time.time()
     results[name] = results2
     print("Finished computing ({1} s): {0}".format(name, tf - t0))
     print('-'*30)
 
 print "Saving results to: ", calcpath + 'results.pickle'
 cg.save_data(results, calcpath + 'results.pickle')
+
+tfinish = time.time()
+print "-"*80
+print "Finished computation in {0} seconds!".format(tfinish-tstart)
