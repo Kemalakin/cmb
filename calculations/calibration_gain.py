@@ -48,7 +48,7 @@ def mkdir_p(path):
         else: raise
 
 
-def save_dict_to_hd5(f, d, replace=False, prefix=None):
+def save_dict_to_hd5(f, d, replace=False, prefix=None, root=None, verbose=False):
     # Define the recursive worker function
     def _recurse(f, d):
         for key, value in d.items():
@@ -63,7 +63,7 @@ def save_dict_to_hd5(f, d, replace=False, prefix=None):
         if prefix is None:
             prefix = '' if f.startswith('/') else '.'
         fname = os.path.abspath(prefix + '/' + f)
-        print("Making hd5 file: {0}".format(fname))
+        if verbose: print("Making hd5 file: {0}".format(fname))
         dirname = os.path.dirname(fname)
         mkdir_p(dirname)
         if replace:
@@ -72,8 +72,18 @@ def save_dict_to_hd5(f, d, replace=False, prefix=None):
             except OSError:
                 pass
         with h5py.File(fname) as ff:
+            if root is not None:
+                rootdir = os.path.dirname(root + '/')
+                rootdir = rootdir.lstrip('./')
+                if rootdir:
+                    ff = ff.create_group(root)
             _recurse(ff, d)
     else:
+        if root is not None:
+            rootdir = os.path.dirname(root + '/')
+            rootdir = rootdir.lstrip('./')
+            if rootdir:
+                f = f.create_group(root)
         _recurse(f, d)
 
 
@@ -90,6 +100,24 @@ def read_dict_from_hd5(f):
     with h5py.File(f, 'r') as f:
         d = _recurse(f)
     return d
+
+
+def make_dict_from_hd5_tree(directory, fname=None, verbose=True):
+    matches = []
+    for root, dirnames, filenames in os.walk('.'):
+        print(root, dirnames, filenames)
+        for filename in fnmatch.filter(filenames, '*.hd5'):
+            matches.append(os.path.join(root, filename))
+
+    if fname is None:
+        fname = os.path.abspath(directory) + '.hd5'
+
+    if verbose: print("Making hd5 file: {0}".format(fname))
+    with h5py.File(fname) as f:
+        for fname in matches:
+            root = os.path.splitext(fname)[0]
+            d = read_dict_from_hd5(fname)
+            save_dict_to_hd5(f, d, root=root)
 
 
 def many_realizations(freqs, N=100, xxs=['BB'], fname=None, regnoise=0., lensed=False,
