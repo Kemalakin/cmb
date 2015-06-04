@@ -54,11 +54,11 @@ for i in arglist:
     toadd = {'label': label, 'args': argdict}
     argdicts[name] = toadd
 
-results = {}
+#results = {}
 ells = np.unique(np.logspace(np.log10(2), np.log10(400), 200).astype('int'))
 gains = [1.05]*len(ells)
 for name, ad in argdicts.items():
-    results2 = {}
+#    results2 = {}
     t0 = time.time()
     print("Computing case: {0}".format(name))
     print("ells = {0}".format(ells))
@@ -78,17 +78,17 @@ for name, ad in argdicts.items():
             cld = cg.many_realizations_parallel(cal_gains=cal_gains,
                                                 **(ad['args']))
             cg.save_dict_to_hd5(fname, cld)
-            results2[ell] = {'cldict': cld, 'gain': gain}
+#            results2[ell] = {'cldict': cld, 'gain': gain}
             t2 = time.time()
             print("Finished ell = {0} in {1} seconds.".format(ell, t2-t1))
         print('.'*10)
     tf = time.time()
-    results[name] = results2
+#    results[name] = results2
     print("Finished computing ({1} s): {0}".format(name, tf - t0))
     print('-'*30)
 
-print "Saving results to: ", calcpath + 'all_results.pickle'
-cg.save_data(results, calcpath + 'all_results.pickle')
+# print "Saving results to: ", calcpath + 'all_results.pickle'
+# cg.save_data(results, calcpath + 'all_results.pickle')
 
 tfinish = time.time()
 print "-"*80
