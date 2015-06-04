@@ -31,7 +31,7 @@ baseargdict = {'lensed': lensed,
                'modcov': modcov,
                'fname': fname,
                'verbose': verbose,
-               'N': 100}
+               'N': 400}
 
 argdicts = {}
 arglist = [#('low_2_lownoise', [200., 270.], 0.1, '(200, 270) GHz, Low Noise'),
