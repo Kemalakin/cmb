@@ -60,7 +60,8 @@ def save_dict_to_hd5(f, d, replace=False, prefix=None):
 
     # Make an hd5 file if we haven't passed one in
     if not isinstance(f, (h5py.File, h5py.Group)):
-        prefix = '.' if (prefix is None) else prefix
+        if prefix is None:
+            prefix = '' if f.startswith('/') else '.'
         fname = os.path.abspath(prefix + '/' + f)
         print("Making hd5 file: {0}".format(fname))
         dirname = os.path.dirname(fname)
@@ -74,6 +75,21 @@ def save_dict_to_hd5(f, d, replace=False, prefix=None):
             _recurse(ff, d)
     else:
         _recurse(f, d)
+
+
+def read_dict_from_hd5(f):
+    def _recurse(v):
+        d = {}
+        for key, value in v.items():
+            if isinstance(value, h5py.Group):
+                d[key] = _recurse(value)
+            else:
+                d[key] = value[:]
+        return d        
+    
+    with h5py.File(f, 'r') as f:
+        d = _recurse(f)
+    return d
 
 
 def many_realizations(freqs, N=100, xxs=['BB'], fname=None, regnoise=0., lensed=False,
@@ -177,17 +193,34 @@ fname = datapath + 'explanatory_cl.dat'
 lensed = False
 modcov = False
 
-cldict_normal_test = calculations.ilc_foreground_cleaning.polarized_ilc_reconstruction(
+print("="*80)
+print("Importing calibration_gain.")
+cntpath = os.path.abspath(datapath + 'cldict_normal_test.hd5')
+if os.path.exists(cntpath):
+    print("cldict_normal_test already exists at {0}. Loading it.".format(cntpath))
+    cldict_normal_test = read_dict_from_hd5(cntpath)
+else:
+    print("cldict_normal_test does not exist. Creating it.")
+    cldict_normal_test = calculations.ilc_foreground_cleaning.polarized_ilc_reconstruction(
                         frequencies=np.array([200., 270., 350., 600.])*1.e9, fname=fname,
                         regnoise=regnoise, lensed=lensed, modcov=modcov, verbose=True)
-noisemap = cldict_normal_test['noisemaps'][0][0]
-cls_noise = hp.anafast([noisemap, noisemap, noisemap])
-labels = ['TT', 'EE', 'BB', 'TE', 'EB', 'TB']
-cldict_noise = {labels[i]: cls_noise[i] for i in range(len(labels))}
+    save_dict_to_hd5(cntpath, cldict_normal_test)
+clnpath = os.path.abspath(datapath + 'cldict_noise.hd5')
+if os.path.exists(clnpath):
+    print("cldict_noise already exists at {0}. Loading it.".format(clnpath))
+    cldict_noise = read_dict_from_hd5(clnpath)
+else:
+    print("Computing noise C_l's.")
+    noisemap = cldict_normal_test['noisemaps'][0][0]
+    cls_noise = hp.anafast([noisemap, noisemap, noisemap])
+    labels = ['TT', 'EE', 'BB', 'TE', 'EB', 'TB']
+    cldict_noise = {labels[i]: cls_noise[i] for i in range(len(labels))}
+    save_dict_to_hd5(clnpath, cldict_noise)
 cldict_noise['ell'] = np.arange(len(cldict_noise['TT']), dtype='float')
-
+    
 prefix_noise = cldict_noise['ell']*(cldict_noise['ell'] + 1)/(2*np.pi)
-
+print("Finished importing calibration_gain.")
+print("="*80)
 
 def myplot(cld, name, label, nf=1., bbmax=0.1, cldict_input=None):
     fig, ax = plt.subplots()
