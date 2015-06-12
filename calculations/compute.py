@@ -56,7 +56,8 @@ for i in arglist:
 
 #results = {}
 ells = np.unique(np.logspace(np.log10(2), np.log10(400), 200).astype('int'))
-gains = [1.05]*len(ells)
+gainfactor = 1.5
+gains = [gainfactor]*len(ells)
 for name, ad in argdicts.items():
 #    results2 = {}
     t0 = time.time()
