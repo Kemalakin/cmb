@@ -19,14 +19,14 @@ __releasestatus__ = 'beta'
 
 import os
 import inspect
-import pickle
+# import pickle
 import time
 import errno
 import fnmatch
 
 import numpy as np
-import healpy as hp
-import matplotlib.pyplot as plt
+# import healpy as hp
+# import matplotlib.pyplot as plt
 import h5py
 from IPython import parallel as p
 rc = p.Client()
@@ -261,7 +261,7 @@ def many_realizations_parallel(freqs, N=100, xxs=['BB'], fname=None,
 #     cldict_noise = {labels[i]: cls_noise[i] for i in range(len(labels))}
 #     save_dict_to_hd5(clnpath, cldict_noise)
 # cldict_noise['ell'] = np.arange(len(cldict_noise['TT']), dtype='float')
-    
+
 # prefix_noise = cldict_noise['ell']*(cldict_noise['ell'] + 1)/(2*np.pi)
 # print("Finished importing calibration_gain.")
 # print("="*80)
