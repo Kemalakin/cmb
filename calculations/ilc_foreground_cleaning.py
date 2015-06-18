@@ -61,6 +61,19 @@ def regenerate_dust(frequencies, fgfile=None, Nside=512, verbose=True, force=Fal
         print "Saving dust maps to: {0}".format(f)
 
 
+def generate_gain_map(ell, gain_error=0.05, Nside=512):
+    """
+    Generates a gain error map.
+    """
+    ell = int(ell)
+    ell_max = max(3*Nside, ell)
+    cls = np.zeros(ell_max, dtype='float')
+    cls[ell] = 1.
+    m = hp.synfast(cls, Nside=Nside)
+    m = 1. + m*gain_error/m.std()
+    return m
+
+
 def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
                                  lensed=False, fgfile=None, regnoise=None,
                                  verbose=True, _debug=False,
@@ -96,13 +109,9 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
         instance. Generally should not, since the dust maps are not stochastic.
     `cal_gains` - Determines if a calibration gain factor should be injected
         into the power spectrum before making the map. `cal_gains` should be a
-        list with 2 sub-lists. The first sublist contains the ells at which the
-        gain should be applied, and the second sublist contains the gain factors
-        corresponding to the ells. E.g.,
-
-        cal_gains = [[10, 11, 12],        # Apply gain to ell = 10, 11, 12
-                     [1.05, 1.1, 1.05]]   # Gains are 1.05, 1.1, 1.05
-
+        2-element list, [ell, gain_error]. The first element is the ell bin to
+        apply the gain error and the second element is the gain error value.
+        The result will be such that np.std(gain_map) = gain_error.
     """
     frequencies = np.array(frequencies)
     if verbose:
@@ -114,8 +123,7 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
     if verbose:
         print "Constructing CMB temperature and polarization maps."
     (Tmap, Qmap, Umap), cldict = lib.cmb.generate_maps(Nside=Nside,
-                        n2r=True, return_cls=True, fname=fname, lensed=lensed,
-                        cal_gains=cal_gains)
+                        n2r=True, return_cls=True, fname=fname, lensed=lensed)
     cmbQUmaps = np.vstack([Qmap, Umap])  # uK
 
     # Try to load dust from file.
@@ -168,7 +176,12 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
         rn = regnoise[i]
         noise = rn*np.random.randn(*np.shape(cmbQUmaps))
         noisemaps.append(noise)
-        totalQUmaps.append(cmbQUmaps + dustmap + noise)
+        totalmap = cmbQUmaps + dustmap + noise
+        if cal_gains:
+            ell, gain_error = cal_gains
+            gain_map = generate_gain_map(ell, gain_error, Nside)
+            totalmap *= gain_map
+        totalQUmaps.append(totalmap)
     noisemaps = np.array(noisemaps)
     # totalQUmaps = [cmbQUmaps + dustmap + noise for dustmap in dustmaps]
 

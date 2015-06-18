@@ -174,7 +174,7 @@ def generate_T_map(Nside=512, lensed=True, n2r=False, fname=None):
 
 
 def generate_maps(Nside=512, lensed=True, n2r=False, return_cls=False,
-                       fname=None, cal_gains=None):
+                       fname=None):
     """
     Generates a realization of the standard LCDM CMB T, Q, and U maps,
     using parameters that should agree with Planck 2013, in units of uK,
@@ -192,29 +192,9 @@ def generate_maps(Nside=512, lensed=True, n2r=False, return_cls=False,
     Cl's are in units of uK^2 and are related to Dl's by
 
         D_\ell^{XX} = \frac{\ell(\ell+1)}{2\pi} C_\ell^{XX}
-
-    `cal_gains` determines if a calibration gain factor should be injected into
-    the power spectrum before making the map. `cal_gains` should be a list with
-    2 sub-lists. The first sublist contains the ells at which the gain should
-    be applied, and the second sublist contains the gain factors corresponding
-    to the ells. E.g.,
-
-        cal_gains = [[10, 11, 12],        # Apply gain to ell = 10, 11, 12
-                     [1.05, 1.1, 1.05]]   # Gains are 1.05, 1.1, 1.05
-
-    Note, however, that if `return_cls` is True, the reported Cl's do NOT
-    include the calibration gain.
     """
     cldict = get_cls(lensed=lensed, fname=fname)
     cls = np.array([cldict[xx] for xx in ('TT', 'EE', 'BB', 'TE')])
-    if cal_gains is not None:
-        ells = cldict['ell']
-        gain_ells, gains = cal_gains
-        for i in range(len(gain_ells)):
-            gell = gain_ells[i]
-            gain = gains[i]
-            index = np.where(ells == gell)[0]
-            cls[:, index] *= gain
     maps = list(hp.synfast(cls, nside=Nside, pol=True, new=True,
                            verbose=False))
     if not n2r:
