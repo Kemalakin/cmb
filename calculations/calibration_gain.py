@@ -165,6 +165,8 @@ def many_realizations_parallel(freqs, N=100, xxs=['BB'], fname=None,
     cldict = {key: [] for key in xxs}
     cldict['weights_Q'] = []
     cldict['weights_U'] = []
+    cldict['ilcQmaps'] = []
+    cldict['ilcUmaps'] = []
 
     # Generate dust maps
     if name is not None:
@@ -181,7 +183,7 @@ def many_realizations_parallel(freqs, N=100, xxs=['BB'], fname=None,
                          regnoise=regnoise,  lensed=lensed,
                          verbose=verbose, modcov=modcov,
                          regeneratedust=False, cal_gains=cal_gains)
-        toret = (temp['cl_out'], temp['weights_Q'], temp['weights_U'], temp['regnoise'])
+        toret = temp # (temp['cl_out'], temp['weights_Q'], temp['weights_U'], temp['regnoise'])
         return toret
     print("Distributing {0} iterations to {1} cores.".format(N, len(cluster)))
     t0 = time.time()
@@ -192,9 +194,9 @@ def many_realizations_parallel(freqs, N=100, xxs=['BB'], fname=None,
             retdicts = cluster.apply(dummyfunc, range(N), freqs, False,
                                      fname, regnoise, lensed, verbose,
                                      modcov, False, cal_gains)
-        except p.CompositeError:
+        except p.CompositeError as e:
             error = True
-            print("Error in worker process. Re-trying.")
+            print("Error in worker process ({0}). Re-trying.".format(e))
     # IPython controller and view "conveniently" save results from computations in memory... 
     # This is a memory leak unless those saved results are discarded!
     rc.results.clear()
@@ -203,17 +205,19 @@ def many_realizations_parallel(freqs, N=100, xxs=['BB'], fname=None,
     tf = time.time()
     print("Finished computation in {0} seconds".format(tf - t0))
     print("Collating results.")
-    for (cl_out, weights_Q, weights_U, _) in retdicts:
+    # for (cl_out, weights_Q, weights_U, _) in retdicts:
+    #     for key in xxs:
+    #         cldict[key].append(cl_out[key])
+    #     cldict['weights_Q'].append(weights_Q)
+    #     cldict['weights_U'].append(weights_U)
+    for retdict in retdicts:
+        cl_out = retdict['cl_out']
         for key in xxs:
             cldict[key].append(cl_out[key])
-        cldict['weights_Q'].append(weights_Q)
-        cldict['weights_U'].append(weights_U)
-#    for retdict in retdicts:
-#        cl_out = retdict['cl_out']
-#        for key in xxs:
-#            cldict[key].append(cl_out[key])
-#        cldict['weights_Q'].append(retdict['weights_Q'])
-#        cldict['weights_U'].append(retdict['weights_U'])
+        cldict['weights_Q'].append(retdict['weights_Q'])
+        cldict['weights_U'].append(retdict['weights_U'])
+        cldict['ilcQmaps'].append(retdict['ilcQmap'])
+        cldict['ilcUmaps'].append(retdict['ilcUmap'])
 
     #     print("Finished: {0} of {1}".format(i+1, N), end='\r')
     # print("\n")
@@ -223,8 +227,10 @@ def many_realizations_parallel(freqs, N=100, xxs=['BB'], fname=None,
         cldict[key + '_mean'] = np.mean(cldict[key], axis=0)
         cldict[key + '_std'] = np.std(cldict[key], axis=0)
 
-    cldict['ell'] = retdicts[0][0]['ell'] # cl_out['ell']  #DELME #FIXME
-    cldict['regnoise'] = retdicts[0][3] # retdict['regnoise']  #DELME #FIXME
+    # cldict['ell'] = retdicts[0][0]['ell'] # cl_out['ell']  #DELME #FIXME
+    # cldict['regnoise'] = retdicts[0][3] # retdict['regnoise']  #DELME #FIXME
+    cldict['ell'] = retdicts[0]['cl_in']['ell']
+    cldict['regnoise'] = retdicts[0]['regnoise']
 
     return cldict
 

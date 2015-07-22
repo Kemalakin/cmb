@@ -31,11 +31,11 @@ baseargdict = {'lensed': lensed,
                'modcov': modcov,
                'fname': fname,
                'verbose': verbose,
-               'N': 400}
+               'N': 10} # 400}
 
 argdicts = {}
 arglist = [#('low_2_lownoise', [200., 270.], 0.1, '(200, 270) GHz, Low Noise'),
-           ('all_4', [200., 270., 350., 600.], 1., 'All 4 Frequencies, Normal Noise'),
+#           ('all_4', [200., 270., 350., 600.], 1., 'All 4 Frequencies, Normal Noise'),
 #           ('low_high_2', [200., 600.], 1., '(200, 600) GHz, Normal Noise'),
            ('all_4_lownoise', [200., 270., 350., 600.], 0.1, 'All 4 Frequencies, Low Noise'),
 #           ('200_350', [200., 350.], 1., '(200, 350) GHz, Normal Noise'),
@@ -56,8 +56,8 @@ for i in arglist:
 
 #results = {}
 ells = np.unique(np.logspace(np.log10(2), np.log10(400), 200).astype('int'))
-gainfactor = 1.5
-gains = [gainfactor]*len(ells)
+gain_error = 0.05
+gains = [gain_error]*len(ells)
 for name, ad in argdicts.items():
 #    results2 = {}
     t0 = time.time()
@@ -74,7 +74,7 @@ for name, ad in argdicts.items():
         else:
             print("Starting ell = {0}".format(ell))
             t1 = time.time()
-            cal_gains = [[ell], [gain]]
+            cal_gains = [ell, gain]
 
             cld = cg.many_realizations_parallel(cal_gains=cal_gains,
                                                 **(ad['args']))

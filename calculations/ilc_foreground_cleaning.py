@@ -69,7 +69,7 @@ def generate_gain_map(ell, gain_error=0.05, Nside=512):
     ell_max = max(3*Nside, ell)
     cls = np.zeros(ell_max, dtype='float')
     cls[ell] = 1.
-    m = hp.synfast(cls, Nside=Nside)
+    m = hp.synfast(cls, nside=Nside)
     m = 1. + m*gain_error/m.std()
     return m
 
@@ -179,7 +179,10 @@ def polarized_ilc_reconstruction(frequencies, Nside=512, fname=None,
         totalmap = cmbQUmaps + dustmap + noise
         if cal_gains:
             ell, gain_error = cal_gains
-            gain_map = generate_gain_map(ell, gain_error, Nside)
+            gm = generate_gain_map(ell, gain_error, Nside)
+            gain_map = np.array([gm, gm])
+            # gain_map = np.array([generate_gain_map(ell, gain_error, Nside),
+            #                      generate_gain_map(ell, gain_error, Nside)])
             totalmap *= gain_map
         totalQUmaps.append(totalmap)
     noisemaps = np.array(noisemaps)
